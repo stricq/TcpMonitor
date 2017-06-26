@@ -1,0 +1,20 @@
+﻿<Window x:Class="TcpMonitor.Wpf.Views.TcpMonitorView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mvvm="http://schemas.stricq.com/mvvmcommon/"
+        mvvm:FrameworkElementBehaviors.InitializedCommand="{Binding Path=Initialized}"
+        mvvm:FrameworkElementBehaviors.LoadedCommand="{Binding Path=Loaded}"
+        mvvm:WindowBehaviors.ClosingCommand="{Binding Path=Closing}"
+        mvvm:ViewModelLocator.ComposedViewModel="TcpMonitorViewModel"
+        Title="TCP Monitor - STR Programming Services"
+        WindowStartupLocation="Manual" ResizeMode="CanResizeWithGrip" MinWidth="800" MinHeight="600"
+        SnapsToDevicePixels="True" UseLayoutRounding="True"
+        Foreground="{StaticResource ForegroundColor}" Background="{StaticResource BackgroundColor}"
+        Width="{Binding Path=Settings.WindowW, Mode=TwoWay}" Height="{Binding Path=Settings.WindowH, Mode=TwoWay}"
+         Left="{Binding Path=Settings.WindowX, Mode=TwoWay}"    Top="{Binding Path=Settings.WindowY, Mode=TwoWay}"
+        FontFamily="Tahoma">
+
+  <Grid>
+  </Grid>
+
+</Window>

@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Wpf", "TcpMonitor.Wpf\TcpMonitor.Wpf.csproj", "{E387D901-ED2B-4E21-ADC7-3D3CB899860A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00 Solution Items", "00 Solution Items", "{B55B0962-C6E8-4D82-896F-41118FCBF0CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10 Presentation", "10 Presentation", "{CEFA0970-21ED-4802-BC1E-270CD8B2095B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "20 Domain", "20 Domain", "{431FDAD5-66D4-45F1-A9F3-42A27D82AAD8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "30 Repository", "30 Repository", "{2A22484F-1472-4614-9D43-790BCE917DE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Domain", "TcpMonitor.Domain\TcpMonitor.Domain.csproj", "{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository", "TcpMonitor.Repository\TcpMonitor.Repository.csproj", "{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E387D901-ED2B-4E21-ADC7-3D3CB899860A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E387D901-ED2B-4E21-ADC7-3D3CB899860A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E387D901-ED2B-4E21-ADC7-3D3CB899860A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E387D901-ED2B-4E21-ADC7-3D3CB899860A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E387D901-ED2B-4E21-ADC7-3D3CB899860A} = {CEFA0970-21ED-4802-BC1E-270CD8B2095B}
+		{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99} = {431FDAD5-66D4-45F1-A9F3-42A27D82AAD8}
+		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B} = {2A22484F-1472-4614-9D43-790BCE917DE6}
+	EndGlobalSection
+EndGlobal
