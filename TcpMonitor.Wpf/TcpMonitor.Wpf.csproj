@@ -80,6 +80,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\ConnectionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\TcpMonitorView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -88,10 +92,16 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Controllers\ConnectionsController.cs" />
     <Compile Include="Controllers\TcpMonitorController.cs" />
     <Compile Include="Mappings\ViewEntityMappingConfiguration.cs" />
+    <Compile Include="ViewEntities\ConnectionViewEntity.cs" />
     <Compile Include="ViewEntities\WindowSettingsViewEntity.cs" />
+    <Compile Include="ViewModels\ConnectionsViewModel.cs" />
     <Compile Include="ViewModels\TcpMonitorViewModel.cs" />
+    <Compile Include="Views\ConnectionsView.xaml.cs">
+      <DependentUpon>ConnectionsView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TcpMonitorView.xaml.cs">
       <DependentUpon>TcpMonitorView.xaml</DependentUpon>
       <SubType>Code</SubType>

@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Domain", "TcpMon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository", "TcpMonitor.Repository\TcpMonitor.Repository.csproj", "{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository.IpService", "TcpMonitor.Repository.IpService\TcpMonitor.Repository.IpService.csproj", "{A794103F-F3E6-49E6-8035-AAA77E5E3D3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository.Models", "TcpMonitor.Repository.Models\TcpMonitor.Repository.Models.csproj", "{78026A2B-2C24-4668-B61A-271C0720000B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +39,14 @@ Global
 		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A794103F-F3E6-49E6-8035-AAA77E5E3D3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A794103F-F3E6-49E6-8035-AAA77E5E3D3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A794103F-F3E6-49E6-8035-AAA77E5E3D3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A794103F-F3E6-49E6-8035-AAA77E5E3D3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78026A2B-2C24-4668-B61A-271C0720000B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78026A2B-2C24-4668-B61A-271C0720000B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78026A2B-2C24-4668-B61A-271C0720000B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78026A2B-2C24-4668-B61A-271C0720000B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,5 +55,7 @@ Global
 		{E387D901-ED2B-4E21-ADC7-3D3CB899860A} = {CEFA0970-21ED-4802-BC1E-270CD8B2095B}
 		{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99} = {431FDAD5-66D4-45F1-A9F3-42A27D82AAD8}
 		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B} = {2A22484F-1472-4614-9D43-790BCE917DE6}
+		{A794103F-F3E6-49E6-8035-AAA77E5E3D3D} = {2A22484F-1472-4614-9D43-790BCE917DE6}
+		{78026A2B-2C24-4668-B61A-271C0720000B} = {2A22484F-1472-4614-9D43-790BCE917DE6}
 	EndGlobalSection
 EndGlobal

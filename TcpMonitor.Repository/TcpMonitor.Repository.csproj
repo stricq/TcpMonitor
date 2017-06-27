@@ -42,6 +42,9 @@
     <Reference Include="SharpPcap, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpPcap.4.2.0\lib\net\SharpPcap.dll</HintPath>
     </Reference>
+    <Reference Include="STR.Common, Version=1.0.5922.33591, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\STR.Common.1.0.16079.1\lib\net45\STR.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -53,8 +56,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mappings\DomainModelMappingConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\SettingsRepository.cs" />
+    <Compile Include="Services\ConnectionsService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -64,6 +69,15 @@
       <Project>{f211fdf1-f515-4ece-8b13-f9e0ec1efa99}</Project>
       <Name>TcpMonitor.Domain</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TcpMonitor.Repository.IpService\TcpMonitor.Repository.IpService.csproj">
+      <Project>{a794103f-f3e6-49e6-8035-aaa77e5e3d3d}</Project>
+      <Name>TcpMonitor.Repository.IpService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TcpMonitor.Repository.Models\TcpMonitor.Repository.Models.csproj">
+      <Project>{78026a2b-2c24-4668-b61a-271c0720000b}</Project>
+      <Name>TcpMonitor.Repository.Models</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
