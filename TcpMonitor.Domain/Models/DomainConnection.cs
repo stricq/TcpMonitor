@@ -34,6 +34,8 @@ namespace TcpMonitor.Domain.Models {
     #region Domain Methods
 
     public async Task ResolveHostNames(IConnectionsService connectionsService) {
+      ProcessName = await connectionsService.GetProcessNameAsync(Pid);
+
       LocalHostName = await connectionsService.GetHostNameAsync(LocalEndPoint);
 
       RemoteHostName = await connectionsService.GetHostNameAsync(RemoteEndPoint);

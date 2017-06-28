@@ -26,9 +26,10 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Private Fields
 
-    private List<DomainConnection> connections;
+    private readonly List<DomainConnection> connections;
 
-    private readonly DispatcherTimer timer;
+    private readonly DispatcherTimer connectionsTimer;
+    private readonly DispatcherTimer     displayTimer;
 
     private readonly ConnectionsViewModel viewModel;
 
@@ -52,7 +53,9 @@ namespace TcpMonitor.Wpf.Controllers {
 
       connections = new List<DomainConnection>();
 
-      timer = new DispatcherTimer();
+      connectionsTimer = new DispatcherTimer();
+
+      displayTimer = new DispatcherTimer();
     }
 
     #endregion Constructor
@@ -62,10 +65,15 @@ namespace TcpMonitor.Wpf.Controllers {
     public int InitializePriority { get; } = 100;
 
     public async Task InitializeAsync() {
-      timer.Tick    += onTimerTick;
-      timer.Interval = TimeSpan.FromSeconds(1);
+      connectionsTimer.Tick    += onConnectionsTimerTick;
+      connectionsTimer.Interval = TimeSpan.FromMilliseconds(250);
 
-      timer.Start();
+      connectionsTimer.Start();
+
+      displayTimer.Tick    += onDisplayTimerTick;
+      displayTimer.Interval = TimeSpan.FromSeconds(1);
+
+      displayTimer.Start();
 
       await Task.CompletedTask;
     }
@@ -74,8 +82,8 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Private Methods
 
-    private async void onTimerTick(object sender, EventArgs args) {
-      timer.Stop();
+    private async void onConnectionsTimerTick(object sender, EventArgs args) {
+      connectionsTimer.Stop();
 
       List<DomainConnection> incoming = await connectionService.GetConnectionsAsync();
 
@@ -84,7 +92,7 @@ namespace TcpMonitor.Wpf.Controllers {
                                    select row1).ToList();
 
       mods.ForEach(mod => {
-        List<DomainConnection> matches = connections.Where(connection => connection.Key == mod.Key).ToList();
+        List<DomainConnection> matches = connections.Where(c => c.Key == mod.Key).ToList();
 
         matches.ForEach(match => mapper.Map(mod, match));
       });
@@ -107,11 +115,39 @@ namespace TcpMonitor.Wpf.Controllers {
 
       dels.ForEach(del => connections.Remove(del));
 
-      viewModel.Connections.Clear();
+      connections.Where(c => c.Pid == 0).ToList().ForEach(c => connections.Remove(c));
 
-      viewModel.Connections.AddRange(mapper.Map<List<ConnectionViewEntity>>(connections));
+      connectionsTimer.Start();
+    }
 
-      timer.Start();
+    private void onDisplayTimerTick(object sender, EventArgs args) {
+      List<DomainConnection> mods = (from row1 in connections
+                                     join row2 in viewModel.Connections on row1.Key equals row2.Key
+                                   select row1).ToList();
+
+      mods.ForEach(mod => {
+        List<ConnectionViewEntity> matches = viewModel.Connections.Where(c => c.Key == mod.Key).ToList();
+
+        matches.ForEach(match => {
+          if ((mod.Pid != 0 && match.Pid == 0) || mod.ProcessName != match.ProcessName || mod.State != match.State || mod.LocalHostName != match.LocalHostName || mod.RemoteHostName != match.RemoteHostName) mapper.Map(mod, match);
+        });
+      });
+
+      List<DomainConnection> adds = (from row1 in connections
+                                     join row2 in viewModel.Connections on row1.Key equals row2.Key into collGroup
+                                     from sub  in collGroup.DefaultIfEmpty()
+                                    where sub == null
+                                   select row1).ToList();
+
+      viewModel.Connections.OrderedMerge(mapper.Map<List<ConnectionViewEntity>>(adds.OrderBy(c => c.ProcessName).ThenBy(c => c.LocalEndPoint.Port).ThenBy(c => c.RemoteEndPoint.Port)));
+
+      List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
+                                         join row2 in connections on row1.Key equals row2.Key into collGroup
+                                         from sub  in collGroup.DefaultIfEmpty()
+                                        where sub == null
+                                       select row1).ToList();
+
+      dels.ForEach(del => viewModel.Connections.Remove(del));
     }
 
     #endregion Private Methods

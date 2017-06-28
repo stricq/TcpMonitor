@@ -55,7 +55,7 @@ namespace TcpMonitor.Repository.Services {
     public async Task<string> GetHostNameAsync(IPEndPoint hostAddress) {
       string addr = hostAddress.Address.ToString();
 
-      if (addr == "0.0.0.0" || addr == "::") return addr;
+      if (addr == "0.0.0.0" || addr == "::") return "*";
 
       return await Task.Run(() => {
         try {
@@ -63,6 +63,21 @@ namespace TcpMonitor.Repository.Services {
         }
         catch {
           return addr;
+        }
+      });
+    }
+
+    public async Task<string> GetProcessNameAsync(int pid) {
+      if (pid == 0) return "Unknown";
+
+      return await Task.Run(() => {
+        try {
+          using(Process p = Process.GetProcessById(pid)) {
+            return p.ProcessName;
+          }
+        }
+        catch {
+          return "Unknown";
         }
       });
     }
@@ -101,7 +116,7 @@ namespace TcpMonitor.Repository.Services {
 
         tcp.Pid = BitConverter.ToInt32(tcpTable, index); index += 4;
 
-        tcp.ProcessName = GetProcessNameByPid(tcp.Pid);
+//      tcp.ProcessName = GetProcessNameByPid(tcp.Pid);
 
         table.Add(tcp);
       }
@@ -148,7 +163,7 @@ namespace TcpMonitor.Repository.Services {
 
         tcp.Pid = BitConverter.ToInt32(tcpTable, index); index += 4;
 
-        tcp.ProcessName = GetProcessNameByPid(tcp.Pid);
+//      tcp.ProcessName = GetProcessNameByPid(tcp.Pid);
 
         table.Add(tcp);
       }
@@ -181,7 +196,7 @@ namespace TcpMonitor.Repository.Services {
 
         udp.Pid = BitConverter.ToInt32(udpTable, index); index += 4;
 
-        udp.ProcessName = GetProcessNameByPid(udp.Pid);
+//      udp.ProcessName = GetProcessNameByPid(udp.Pid);
 
         table.Add(udp);
       }
@@ -222,7 +237,7 @@ namespace TcpMonitor.Repository.Services {
 
         udp.Pid = BitConverter.ToInt32(udpTable, index); index += 4;
 
-        udp.ProcessName = GetProcessNameByPid(udp.Pid);
+//      udp.ProcessName = GetProcessNameByPid(udp.Pid);
 
         table.Add(udp);
       }
@@ -256,17 +271,6 @@ namespace TcpMonitor.Repository.Services {
       uint hi = bytes[1];
 
       return (lo << 8) | hi;
-    }
-
-    private static string GetProcessNameByPid(int processId) {
-      try {
-        using(Process p = Process.GetProcessById(processId)) {
-          return p.ProcessName;
-        }
-      }
-      catch {
-        return "Unknown";
-      }
     }
 
     #endregion Private Methods

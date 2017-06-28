@@ -1,9 +1,10 @@
-﻿using STR.MvvmCommon;
+﻿using System;
+using STR.MvvmCommon;
 
 
 namespace TcpMonitor.Wpf.ViewEntities {
 
-  public class ConnectionViewEntity : ObservableObject {
+  public class ConnectionViewEntity : ObservableObject, IComparable<ConnectionViewEntity> {
 
     #region Private Fields
 
@@ -36,6 +37,8 @@ namespace TcpMonitor.Wpf.ViewEntities {
     #endregion Private Fields
 
     #region Properties
+
+    public string Key { get; set; }
 
     public bool HasChanged {
       get => hasChanged;
@@ -88,7 +91,7 @@ namespace TcpMonitor.Wpf.ViewEntities {
     }
 
     public string LocalHostName {
-      get => localHostName;
+      get => String.IsNullOrEmpty(localHostName) ? localAddress : localHostName;
       set { SetField(ref localHostName, value, () => LocalHostName); }
     }
 
@@ -103,7 +106,7 @@ namespace TcpMonitor.Wpf.ViewEntities {
     }
 
     public string RemoteHostName {
-      get => remoteHostName;
+      get => String.IsNullOrEmpty(remoteHostName) ? remoteAddress : remoteHostName;
       set { SetField(ref remoteHostName, value, () => RemoteHostName); }
     }
 
@@ -133,6 +136,21 @@ namespace TcpMonitor.Wpf.ViewEntities {
     }
 
     #endregion Properties
+
+    #region IComparable Implementation
+
+    public int CompareTo(ConnectionViewEntity other) {
+      int compared = String.Compare(ProcessName, other.ProcessName, StringComparison.Ordinal);
+//    int compared = Pid.CompareTo(other.Pid);
+
+      if (compared == 0) compared = LocalPort.CompareTo(other.LocalPort);
+
+      if (compared == 0) compared = RemotePort.CompareTo(other.RemotePort);
+
+      return compared;
+    }
+
+    #endregion IComparable Implementation
 
   }
 
