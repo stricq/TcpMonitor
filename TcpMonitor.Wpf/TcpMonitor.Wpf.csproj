@@ -94,6 +94,8 @@
     </Compile>
     <Compile Include="Controllers\ConnectionsController.cs" />
     <Compile Include="Controllers\TcpMonitorController.cs" />
+    <Compile Include="Extensions\ConnectionViewEntityComparer.cs" />
+    <Compile Include="Extensions\ObservableCollection.Sort.cs" />
     <Compile Include="Mappings\ViewEntityMappingConfiguration.cs" />
     <Compile Include="ViewEntities\ConnectionViewEntity.cs" />
     <Compile Include="ViewEntities\WindowSettingsViewEntity.cs" />

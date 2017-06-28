@@ -159,30 +159,34 @@
             <GridViewRowPresenter Margin="0,0,0,1" VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
           </Border>
           <ControlTemplate.Triggers>
-
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter Property="Background" Value="#300000FF" />
-            </Trigger>
-
-            <DataTrigger Binding="{Binding Path=IsContextMenuOpen}" Value="True">
+            <DataTrigger Binding="{Binding Path=IsSelected}" Value="True">
+              <Setter Property="Background" Value="#FF363EF8" />
+              <Setter Property="Foreground" Value="White"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=IsClosed}" Value="True">
+              <Setter Property="Background" Value="Red" />
+              <Setter Property="Foreground" Value="White" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=HasChanged}" Value="True">
+              <Setter Property="Background" Value="Yellow" />
+              <Setter Property="Foreground" Value="Black" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Path=HasData}" Value="True">
+              <Setter Property="Background" Value="#FFFFD0FF" />
+              <Setter Property="Foreground" Value="Black" />
+            </DataTrigger>
+            <MultiDataTrigger>
+              <MultiDataTrigger.Conditions>
+                <Condition Binding="{Binding Path=IsSelected}" Value="True" />
+                <Condition Binding="{Binding Path=HasData}" Value="True" />
+              </MultiDataTrigger.Conditions>
+              <Setter Property="Background" Value="#FFF83EF8" />
+              <Setter Property="Foreground" Value="White"/>
+            </MultiDataTrigger>
+            <DataTrigger Binding="{Binding Path=IsNew}" Value="True">
               <Setter Property="Background" Value="LightGreen" />
               <Setter Property="Foreground" Value="Black" />
             </DataTrigger>
-
-            <DataTrigger Binding="{Binding Path=IsActive}" Value="True">
-              <Setter Property="Background" Value="#FF363EF8" />
-              <Setter Property="Foreground" Value="White" />
-            </DataTrigger>
-
-            <MultiDataTrigger>
-              <MultiDataTrigger.Conditions>
-                <Condition Binding="{Binding Path=IsActive}"                                          Value="True" />
-                <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True" />
-              </MultiDataTrigger.Conditions>
-              <Setter Property="Background" Value="#FF663EF8" />
-              <Setter Property="Foreground" Value="White" />
-            </MultiDataTrigger>
-
           </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>

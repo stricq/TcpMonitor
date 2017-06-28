@@ -141,7 +141,6 @@ namespace TcpMonitor.Wpf.ViewEntities {
 
     public int CompareTo(ConnectionViewEntity other) {
       int compared = String.Compare(ProcessName, other.ProcessName, StringComparison.Ordinal);
-//    int compared = Pid.CompareTo(other.Pid);
 
       if (compared == 0) compared = LocalPort.CompareTo(other.LocalPort);
 

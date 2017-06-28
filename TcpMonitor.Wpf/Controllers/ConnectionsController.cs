@@ -14,7 +14,7 @@ using STR.MvvmCommon.Contracts;
 
 using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
-
+using TcpMonitor.Wpf.Extensions;
 using TcpMonitor.Wpf.ViewEntities;
 using TcpMonitor.Wpf.ViewModels;
 
@@ -71,7 +71,7 @@ namespace TcpMonitor.Wpf.Controllers {
       connectionsTimer.Start();
 
       displayTimer.Tick    += onDisplayTimerTick;
-      displayTimer.Interval = TimeSpan.FromSeconds(1);
+      displayTimer.Interval = TimeSpan.FromMilliseconds(750);
 
       displayTimer.Start();
 
@@ -121,6 +121,16 @@ namespace TcpMonitor.Wpf.Controllers {
     }
 
     private void onDisplayTimerTick(object sender, EventArgs args) {
+      viewModel.Connections.ForEach(c => {
+        c.IsNew      = false;
+        c.HasChanged = false;
+        c.HasData    = false;
+      });
+
+      List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => c.IsClosed).ToList();
+
+      closed.ForEach(c => viewModel.Connections.Remove(c));
+
       List<DomainConnection> mods = (from row1 in connections
                                      join row2 in viewModel.Connections on row1.Key equals row2.Key
                                    select row1).ToList();
@@ -129,7 +139,13 @@ namespace TcpMonitor.Wpf.Controllers {
         List<ConnectionViewEntity> matches = viewModel.Connections.Where(c => c.Key == mod.Key).ToList();
 
         matches.ForEach(match => {
-          if ((mod.Pid != 0 && match.Pid == 0) || mod.ProcessName != match.ProcessName || mod.State != match.State || mod.LocalHostName != match.LocalHostName || mod.RemoteHostName != match.RemoteHostName) mapper.Map(mod, match);
+          if (mod.Pid != 0 && match.Pid != 0 && mod.Pid != match.Pid) return;
+
+          if ((mod.Pid != 0 && match.Pid == 0) || mod.ProcessName != match.ProcessName || mod.State != match.State || mod.LocalHostName != match.LocalHostName || mod.RemoteHostName != match.RemoteHostName) {
+            mapper.Map(mod, match);
+
+            match.HasChanged = true;
+          }
         });
       });
 
@@ -139,7 +155,11 @@ namespace TcpMonitor.Wpf.Controllers {
                                     where sub == null
                                    select row1).ToList();
 
-      viewModel.Connections.OrderedMerge(mapper.Map<List<ConnectionViewEntity>>(adds.OrderBy(c => c.ProcessName).ThenBy(c => c.LocalEndPoint.Port).ThenBy(c => c.RemoteEndPoint.Port)));
+      List<ConnectionViewEntity> added = mapper.Map<List<ConnectionViewEntity>>(adds.Where(add => !String.IsNullOrEmpty(add.ProcessName)));
+
+      added.ForEach(add => add.IsNew = true);
+
+      viewModel.Connections.OrderedMerge(added.OrderBy(add => add, new ConnectionViewEntityComparer()));
 
       List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
                                          join row2 in connections on row1.Key equals row2.Key into collGroup
@@ -147,7 +167,9 @@ namespace TcpMonitor.Wpf.Controllers {
                                         where sub == null
                                        select row1).ToList();
 
-      dels.ForEach(del => viewModel.Connections.Remove(del));
+      dels.ForEach(del => del.IsClosed = true);
+
+      viewModel.Connections.Sort(new ConnectionViewEntityComparer());
     }
 
     #endregion Private Methods
