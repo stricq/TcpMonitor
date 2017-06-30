@@ -20,7 +20,7 @@ namespace TcpMonitor.Wpf.ViewModels {
 
     private RelayCommand<EventArgs> initialized;
 
-    private RelayCommandAsync<RoutedEventArgs> loaded;
+    private RelayCommand<RoutedEventArgs> loaded;
 
     private RelayCommand<CancelEventArgs> closing;
 
@@ -35,7 +35,7 @@ namespace TcpMonitor.Wpf.ViewModels {
       set { SetField(ref initialized, value, () => Initialized); }
     }
 
-    public RelayCommandAsync<RoutedEventArgs> Loaded {
+    public RelayCommand<RoutedEventArgs> Loaded {
       get => loaded;
       set { SetField(ref loaded, value, () => Loaded); }
     }

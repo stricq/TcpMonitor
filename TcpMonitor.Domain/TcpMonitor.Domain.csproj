@@ -30,8 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper, Version=6.1.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.6.1.0\lib\net45\AutoMapper.dll</HintPath>
+    <Reference Include="AutoMapper, Version=6.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.6.1.1\lib\net45\AutoMapper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -44,9 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\IAutoMapperConfiguration.cs" />
+    <Compile Include="Contracts\ICapturePackets.cs" />
     <Compile Include="Contracts\IConnectionsService.cs" />
     <Compile Include="Contracts\IWindowSettingsRepository.cs" />
     <Compile Include="Models\DomainConnection.cs" />
+    <Compile Include="Models\DomainPacket.cs" />
     <Compile Include="Models\DomainWindowSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

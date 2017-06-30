@@ -78,7 +78,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
     private void registerCommands() {
       viewModel.Initialized = new RelayCommand<EventArgs>(onInitialized);
-      viewModel.Loaded      = new RelayCommandAsync<RoutedEventArgs>(onLoaded);
+      viewModel.Loaded      = new RelayCommand<RoutedEventArgs>(onLoaded);
       viewModel.Closing     = new RelayCommand<CancelEventArgs>(onClosing);
     }
 
@@ -88,8 +88,8 @@ namespace TcpMonitor.Wpf.Controllers {
       messenger.Send(new ApplicationInitializedMessage());
     }
 
-    private async Task onLoaded(RoutedEventArgs args) {
-      await messenger.SendAsync(new ApplicationLoadedMessage());
+    private void onLoaded(RoutedEventArgs args) {
+      messenger.Send(new ApplicationLoadedMessage());
     }
 
     private void onClosing(CancelEventArgs args) {

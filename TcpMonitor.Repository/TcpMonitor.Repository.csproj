@@ -30,17 +30,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper, Version=6.1.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.6.1.0\lib\net45\AutoMapper.dll</HintPath>
+    <Reference Include="AutoMapper, Version=6.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.6.1.1\lib\net45\AutoMapper.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PacketDotNet, Version=0.13.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PacketDotNet.0.13.0\lib\net\PacketDotNet.dll</HintPath>
+      <HintPath>..\packages\Sharp_Pcap.4.2.0\lib\PacketDotNet.dll</HintPath>
     </Reference>
     <Reference Include="SharpPcap, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpPcap.4.2.0\lib\net\SharpPcap.dll</HintPath>
+      <HintPath>..\packages\Sharp_Pcap.4.2.0\lib\SharpPcap.dll</HintPath>
     </Reference>
     <Reference Include="STR.Common, Version=1.0.5922.33591, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\STR.Common.1.0.16079.1\lib\net45\STR.Common.dll</HintPath>
@@ -60,6 +60,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\SettingsRepository.cs" />
     <Compile Include="Services\ConnectionsService.cs" />
+    <Compile Include="Services\PacketCaptureService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

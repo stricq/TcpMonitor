@@ -91,7 +91,7 @@ namespace TcpMonitor.Wpf.ViewEntities {
     }
 
     public string LocalHostName {
-      get => String.IsNullOrEmpty(localHostName) ? localAddress : localHostName;
+      get => String.IsNullOrEmpty(localHostName) ? $"[{localAddress}]" : localHostName;
       set { SetField(ref localHostName, value, () => LocalHostName); }
     }
 
@@ -106,7 +106,7 @@ namespace TcpMonitor.Wpf.ViewEntities {
     }
 
     public string RemoteHostName {
-      get => String.IsNullOrEmpty(remoteHostName) ? remoteAddress : remoteHostName;
+      get => String.IsNullOrEmpty(remoteHostName) ? $"[{remoteAddress}]" : remoteHostName;
       set { SetField(ref remoteHostName, value, () => RemoteHostName); }
     }
 
