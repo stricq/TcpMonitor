@@ -14,6 +14,13 @@ Name: STR Programming Services
 
 Source: http://nuget.stricq.com/nuget
 
+# Color Highlights Key
+
+* Green - New Connection
+* Yellow - State Change
+* Red - Connection Closed
+* Purple - Data Transfered
+
 # Screen Shots
 
 Normal View
