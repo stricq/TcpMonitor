@@ -18,8 +18,8 @@ Source: http://nuget.stricq.com/nuget
 
 Normal View
 
-![Normal View](https://stricq.com/images/TcpMonitor-1.png){:height="25%" width="25%"}
+![Normal View](https://stricq.com/images/TcpMonitor-1.png)
 
 Filtered View
 
-![Filtered View](https://stricq.com/images/TcpMonitor-2.png){:height="25%" width="25%"}
+![Filtered View](https://stricq.com/images/TcpMonitor-2.png)
