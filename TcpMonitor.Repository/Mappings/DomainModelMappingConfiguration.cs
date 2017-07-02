@@ -16,7 +16,8 @@ namespace TcpMonitor.Repository.Mappings {
     #region IAutoMapperConfiguration
 
     public void RegisterMappings(IMapperConfigurationExpression config) {
-      config.CreateMap<Connection, DomainConnection>().ForMember(dest => dest.Key,            opt => opt.ResolveUsing(src => $"{src.ConnectionType}/{src.LocalEndPoint.Address.ToString()}/{src.LocalEndPoint.Port}/{src.RemoteEndPoint.Address.ToString()}/{src.RemoteEndPoint.Port}"))
+      config.CreateMap<Connection, DomainConnection>().ForMember(dest => dest.Key,            opt => opt.ResolveUsing(src => src.ConnectionType.StartsWith("TCP") ? $"{src.ConnectionType}/{src.LocalEndPoint.Address}/{src.LocalEndPoint.Port}/{src.RemoteEndPoint.Address}/{src.RemoteEndPoint.Port}"
+                                                                                                                                                                  : $"{src.ConnectionType}/{src.LocalEndPoint.Address}/{src.LocalEndPoint.Port}"))
                                                       .ForMember(dest => dest.LocalHostName,  opt => opt.Ignore())
                                                       .ForMember(dest => dest.RemoteHostName, opt => opt.Ignore());
 

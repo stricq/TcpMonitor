@@ -15,7 +15,7 @@
          Left="{Binding Path=Settings.WindowX, Mode=TwoWay}"    Top="{Binding Path=Settings.WindowY, Mode=TwoWay}"
         FontFamily="Tahoma">
 
-  <Grid Margin="6">
+  <Grid>
     <v:ConnectionsView />
   </Grid>
 

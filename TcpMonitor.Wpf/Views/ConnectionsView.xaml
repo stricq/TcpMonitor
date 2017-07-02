@@ -11,82 +11,148 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <Border Grid.Row="1" BorderThickness="1" BorderBrush="{StaticResource ContentControlBorderColor}">
+    <Grid Grid.Row="0" Margin="6,6,6,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Orientation="Horizontal">
+        <Label Content="Filter:" Foreground="{StaticResource ForegroundColor}" />
+        <TextBox Text="{Binding Path=ConnectionFilter, UpdateSourceTrigger=PropertyChanged}" Width="300" Margin="0,0,6,0" VerticalContentAlignment="Center" />
+        <ToggleButton Content="Filter" IsChecked="{Binding Path=IsFiltered}" Width="75" />
+      </StackPanel>
+
+    </Grid>
+
+    <Border Grid.Row="1" Margin="6" BorderThickness="1" BorderBrush="{StaticResource ContentControlBorderColor}">
       <ListView ItemsSource="{Binding Path=Connections}" SelectionMode="Multiple" BorderThickness="0" FontFamily="Consolas" FontSize="12" Foreground="{StaticResource ForegroundColor}" Background="{StaticResource BackgroundColor}">
-          <ListView.View>
-            <GridView>
-              <GridViewColumn Header="PID">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=Pid}" TextAlignment="Right" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-              <GridViewColumn Header="Process Name" DisplayMemberBinding="{Binding Path=ProcessName}" />
-              <GridViewColumn Header="Type"         DisplayMemberBinding="{Binding Path=ConnectionType}" />
-              <GridViewColumn Header="Local Address">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=LocalHostName}" ToolTip="{Binding Path=LocalAddress}" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-              <GridViewColumn Header="Local Port">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=LocalPort}" TextAlignment="Right" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-              <GridViewColumn Header="Remote Address">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=RemoteHostName}" ToolTip="{Binding Path=RemoteAddress}" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-              <GridViewColumn Header="Remote Port">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=RemotePort}" TextAlignment="Right" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-              <GridViewColumn Header="State" DisplayMemberBinding="{Binding Path=State}" />
-              <GridViewColumn Header="Packets Sent">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=PacketsSent, StringFormat={}{0:N0}}" TextAlignment="Right" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-              <GridViewColumn Header="Bytes Sent">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=BytesSent, StringFormat={}{0:N0}}" TextAlignment="Right" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-              <GridViewColumn Header="Packets Received">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=PacketsReceived, StringFormat={}{0:N0}}" TextAlignment="Right" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-              <GridViewColumn Header="Bytes Received">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <TextBlock Text="{Binding Path=BytesReceived, StringFormat={}{0:N0}}" TextAlignment="Right" />
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-            </GridView>
-          </ListView.View>
+        <ListView.View>
+          <GridView>
+            <GridViewColumn Header="PID">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=Pid}" TextAlignment="Right" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="Process Name" DisplayMemberBinding="{Binding Path=ProcessName}" />
+            <GridViewColumn Header="Type"         DisplayMemberBinding="{Binding Path=ConnectionType}" />
+            <GridViewColumn Header="Local Address">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=LocalHostName}" ToolTip="{Binding Path=LocalAddress}" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="Local Port">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=LocalPort}" TextAlignment="Right" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="Remote Address">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=RemoteHostName}" ToolTip="{Binding Path=RemoteAddress}" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="Remote Port">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=RemotePort}" TextAlignment="Right" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="State" DisplayMemberBinding="{Binding Path=State}" />
+            <GridViewColumn Header="Packets Sent">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=PacketsSent, StringFormat={}{0:N0}}" TextAlignment="Right" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="Bytes Sent">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=BytesSent, StringFormat={}{0:N0}}" TextAlignment="Right" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="Packets Received">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=PacketsReceived, StringFormat={}{0:N0}}" TextAlignment="Right" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+            <GridViewColumn Header="Bytes Received">
+              <GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Path=BytesReceived, StringFormat={}{0:N0}}" TextAlignment="Right" />
+                </DataTemplate>
+              </GridViewColumn.CellTemplate>
+            </GridViewColumn>
+          </GridView>
+        </ListView.View>
       </ListView>
     </Border>
+
+    <StatusBar Grid.Row="2" Height="24" BorderThickness="0,1,0,0" BorderBrush="{StaticResource StatusBarBorderColor}" Background="{StaticResource TabItemUnSelectedGradient}">
+      <StatusBar.ItemsPanel>
+        <ItemsPanelTemplate>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+          </Grid>
+        </ItemsPanelTemplate>
+      </StatusBar.ItemsPanel>
+
+      <StatusBarItem Grid.Column="0">
+        <TextBlock Text="{Binding Path=TcpConnections, StringFormat='TCP Connections: {0:N0}'}" Margin="0" Foreground="White" />
+      </StatusBarItem>
+
+      <Separator Grid.Column="1" />
+
+      <StatusBarItem Grid.Column="2">
+        <TextBlock Text="{Binding Path=UdpConnections, StringFormat='UDP Connections: {0:N0}'}" Margin="0" Foreground="White" />
+      </StatusBarItem>
+
+      <Separator Grid.Column="3" />
+
+      <StatusBarItem Grid.Column="4">
+        <TextBlock Text="{Binding Path=DroppedPackets, StringFormat='Dropped Packets: {0:N0}'}" Margin="0" Foreground="White" />
+      </StatusBarItem>
+
+      <Separator Grid.Column="5" />
+
+      <Separator Grid.Column="7" />
+
+      <StatusBarItem Grid.Column="8">
+        <TextBlock Text="{Binding Path=Memory, StringFormat='Memory: {0:N1}MB'}" Margin="0" Foreground="White" />
+      </StatusBarItem>
+
+      <Separator Grid.Column="9" />
+
+      <StatusBarItem Grid.Column="10" Width="17" />
+    </StatusBar>
+
   </Grid>
 
 </UserControl>

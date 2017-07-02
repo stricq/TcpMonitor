@@ -1,4 +1,5 @@
 ﻿using System;
+
 using STR.MvvmCommon;
 
 
@@ -7,6 +8,8 @@ namespace TcpMonitor.Wpf.ViewEntities {
   public class ConnectionViewEntity : ObservableObject, IComparable<ConnectionViewEntity> {
 
     #region Private Fields
+
+    private bool isVisible;
 
     private bool hasChanged;
     private bool hasData;
@@ -39,6 +42,11 @@ namespace TcpMonitor.Wpf.ViewEntities {
     #region Properties
 
     public string Key { get; set; }
+
+    public bool IsVisible {
+      get => isVisible;
+      set { SetField(ref isVisible, value, () => IsVisible); }
+    }
 
     public bool HasChanged {
       get => hasChanged;
@@ -150,6 +158,14 @@ namespace TcpMonitor.Wpf.ViewEntities {
     }
 
     #endregion IComparable Implementation
+
+    #region Overrides
+
+    public override string ToString() {
+      return $"{Pid}\n{ProcessName}\n{ConnectionType}\n{LocalAddress}\n{LocalPort}\n{RemoteAddress}\n{RemotePort}\n{State}";
+    }
+
+    #endregion Overrides
 
   }
 

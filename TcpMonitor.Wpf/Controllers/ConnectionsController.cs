@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
@@ -136,6 +138,8 @@ namespace TcpMonitor.Wpf.Controllers {
 
         remote.HasData = true;
       });
+
+      if (!locals.Any() && !remotes.Any()) viewModel.DroppedPackets++;
     }
 
     private async void onConnectionsTimerTick(object sender, EventArgs args) {
@@ -177,6 +181,8 @@ namespace TcpMonitor.Wpf.Controllers {
     }
 
     private void onDisplayTimerTick(object sender, EventArgs args) {
+      displayTimer.Stop();
+
       viewModel.Connections.ForEach(c => {
         c.IsNew      = false;
         c.HasChanged = false;
@@ -198,9 +204,9 @@ namespace TcpMonitor.Wpf.Controllers {
           if (mod.Pid != 0 && match.Pid != 0 && mod.Pid != match.Pid) return;
 
           if ((mod.Pid != 0 && match.Pid == 0) || mod.ProcessName != match.ProcessName || mod.State != match.State || mod.LocalHostName != match.LocalHostName || mod.RemoteHostName != match.RemoteHostName) {
-            mapper.Map(mod, match);
+            match.HasChanged = mod.State != match.State;
 
-            match.HasChanged = true;
+            mapper.Map(mod, match);
           }
         });
       });
@@ -226,6 +232,25 @@ namespace TcpMonitor.Wpf.Controllers {
       dels.ForEach(del => del.IsClosed = true);
 
       lock(EntityLock) viewModel.Connections.Sort(comparer);
+
+      if (viewModel.IsFiltered && !String.IsNullOrEmpty(viewModel.ConnectionFilter)) {
+        try {
+          Regex regex = new Regex(viewModel.ConnectionFilter, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+          viewModel.Connections.ForEach(c => c.IsVisible = regex.IsMatch(c.ToString()));
+        }
+        catch(ArgumentException) { }
+      }
+      else viewModel.Connections.ForEach(c => c.IsVisible = true);
+
+      viewModel.TcpConnections = viewModel.Connections.Count(c => c.ConnectionType.StartsWith("TCP"));
+      viewModel.UdpConnections = viewModel.Connections.Count(c => c.ConnectionType.StartsWith("UDP"));
+
+      using(Process process = Process.GetCurrentProcess()) {
+        viewModel.Memory = process.WorkingSet64 / 1024.0 / 1024.0;
+      }
+
+      displayTimer.Start();
     }
 
     #endregion Private Methods
