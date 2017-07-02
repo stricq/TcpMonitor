@@ -147,17 +147,13 @@ namespace TcpMonitor.Wpf.Controllers {
 
       List<DomainConnection> incoming = await connectionService.GetConnectionsAsync();
 
-      incoming.Where(c => c.Pid == 0).ToList().ForEach(c => incoming.Remove(c));
+      if (!viewModel.ViewPidZero) incoming.Where(c => c.Pid == 0).ToList().ForEach(c => incoming.Remove(c));
 
-      List<DomainConnection> mods = (from row1 in incoming
-                                     join row2 in connections on row1.Key equals row2.Key
-                                   select row1).ToList();
+      var mods = (from row1 in incoming
+                  join row2 in connections on row1.Key equals row2.Key
+                select new { Mod = row1, Match = row2 }).ToList();
 
-      mods.ForEach(mod => {
-        List<DomainConnection> matches = connections.Where(c => c.Key == mod.Key).ToList();
-
-        matches.ForEach(match => mapper.Map(mod, match));
-      });
+      mods.ForEach(set => mapper.Map(set.Mod, set.Match));
 
       List<DomainConnection> adds = (from row1 in incoming
                                      join row2 in connections on row1.Key equals row2.Key into collGroup
@@ -193,22 +189,18 @@ namespace TcpMonitor.Wpf.Controllers {
 
       lock(EntityLock) closed.ForEach(c => viewModel.Connections.Remove(c));
 
-      List<DomainConnection> mods = (from row1 in connections
-                                     join row2 in viewModel.Connections on row1.Key equals row2.Key
-                                   select row1).ToList();
+      var mods = (from row1 in connections
+                  join row2 in viewModel.Connections on row1.Key equals row2.Key
+                select new { Mod = row1, Match = row2 }).ToList();
 
-      mods.ForEach(mod => {
-        List<ConnectionViewEntity> matches = viewModel.Connections.Where(c => c.Key == mod.Key).ToList();
+      mods.ForEach(set => {
+        if (set.Mod.Pid != 0 && set.Match.Pid != 0 && set.Mod.Pid != set.Match.Pid) return;
 
-        matches.ForEach(match => {
-          if (mod.Pid != 0 && match.Pid != 0 && mod.Pid != match.Pid) return;
+        if ((set.Mod.Pid != 0 && set.Match.Pid == 0) || set.Mod.ProcessName != set.Match.ProcessName || set.Mod.State != set.Match.State || set.Mod.LocalHostName != set.Match.LocalHostName || set.Mod.RemoteHostName != set.Match.RemoteHostName) {
+          set.Match.HasChanged = set.Mod.State != set.Match.State;
 
-          if ((mod.Pid != 0 && match.Pid == 0) || mod.ProcessName != match.ProcessName || mod.State != match.State || mod.LocalHostName != match.LocalHostName || mod.RemoteHostName != match.RemoteHostName) {
-            match.HasChanged = mod.State != match.State;
-
-            mapper.Map(mod, match);
-          }
-        });
+          mapper.Map(set.Mod, set.Match);
+        }
       });
 
       List<DomainConnection> adds = (from row1 in connections

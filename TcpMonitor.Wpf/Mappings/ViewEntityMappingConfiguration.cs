@@ -19,7 +19,7 @@ namespace TcpMonitor.Wpf.Mappings {
       config.CreateMap<DomainWindowSettings, WindowSettingsViewEntity>().ForMember(dest => dest.AreSettingsChanged, opt => opt.Ignore())
                                                                         .ReverseMap();
 
-      config.CreateMap<DomainConnection, ConnectionViewEntity>().ForMember(dest => dest.IsVisible,       opt => opt.Ignore())
+      config.CreateMap<DomainConnection, ConnectionViewEntity>().ForMember(dest => dest.IsVisible,       opt => opt.UseValue(true))
                                                                 .ForMember(dest => dest.HasChanged,      opt => opt.Ignore())
                                                                 .ForMember(dest => dest.HasData,         opt => opt.Ignore())
                                                                 .ForMember(dest => dest.IsClosed,        opt => opt.Ignore())

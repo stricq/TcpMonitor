@@ -26,6 +26,10 @@
         <ToggleButton Content="Filter" IsChecked="{Binding Path=IsFiltered}" Width="75" />
       </StackPanel>
 
+      <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+        <ToggleButton Content="View PID 0" IsChecked="{Binding Path=ViewPidZero}" Width="75" />
+      </StackPanel>
+
     </Grid>
 
     <Border Grid.Row="1" Margin="6" BorderThickness="1" BorderBrush="{StaticResource ContentControlBorderColor}">

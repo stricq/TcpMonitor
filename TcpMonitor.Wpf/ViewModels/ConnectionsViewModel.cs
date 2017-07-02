@@ -18,6 +18,8 @@ namespace TcpMonitor.Wpf.ViewModels {
 
     public bool isFiltered;
 
+    public bool viewPidZero;
+
     private double memory;
 
     private int tcpConnections;
@@ -41,6 +43,11 @@ namespace TcpMonitor.Wpf.ViewModels {
     public bool IsFiltered {
       get => isFiltered;
       set { SetField(ref isFiltered, value, () => IsFiltered); }
+    }
+
+    public bool ViewPidZero {
+      get => viewPidZero;
+      set { SetField(ref viewPidZero, value, () => ViewPidZero); }
     }
 
     public ObservableCollection<ConnectionViewEntity> Connections {
