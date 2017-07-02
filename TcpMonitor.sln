@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Wpf", "TcpMonitor.Wpf\TcpMonitor.Wpf.csproj", "{E387D901-ED2B-4E21-ADC7-3D3CB899860A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00 Solution Items", "00 Solution Items", "{B55B0962-C6E8-4D82-896F-41118FCBF0CF}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10 Presentation", "10 Presentation", "{CEFA0970-21ED-4802-BC1E-270CD8B2095B}"
 EndProject
