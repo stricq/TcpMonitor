@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository.IpSer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository.Models", "TcpMonitor.Repository.Models\TcpMonitor.Repository.Models.csproj", "{78026A2B-2C24-4668-B61A-271C0720000B}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "TcpMonitor.Installer", "TcpMonitor.Installer\TcpMonitor.Installer.vdproj", "{3D99E54C-9B80-46EC-9FD4-C10E99D3540F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,8 @@ Global
 		{78026A2B-2C24-4668-B61A-271C0720000B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78026A2B-2C24-4668-B61A-271C0720000B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78026A2B-2C24-4668-B61A-271C0720000B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D99E54C-9B80-46EC-9FD4-C10E99D3540F}.Debug|Any CPU.ActiveCfg = Debug
+		{3D99E54C-9B80-46EC-9FD4-C10E99D3540F}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,5 +64,6 @@ Global
 		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B} = {2A22484F-1472-4614-9D43-790BCE917DE6}
 		{A794103F-F3E6-49E6-8035-AAA77E5E3D3D} = {2A22484F-1472-4614-9D43-790BCE917DE6}
 		{78026A2B-2C24-4668-B61A-271C0720000B} = {2A22484F-1472-4614-9D43-790BCE917DE6}
+		{3D99E54C-9B80-46EC-9FD4-C10E99D3540F} = {B55B0962-C6E8-4D82-896F-41118FCBF0CF}
 	EndGlobalSection
 EndGlobal

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -25,6 +26,10 @@ namespace TcpMonitor.Repository.Services {
 
     #region Private Fields
 
+    private readonly ConcurrentDictionary<IPAddress, string> dnsCache;
+
+    private readonly IPAddress[] localAddresses;
+
     private readonly Func<List<Connection>>[] tables = { GetExtendedTcpTable4, GetExtendedTcpTable6, GetExtendedUdpTable4, GetExtendedUdpTable6 };
 
     private readonly IMapper mapper;
@@ -36,6 +41,10 @@ namespace TcpMonitor.Repository.Services {
     [ImportingConstructor]
     public ConnectionsService(IMapper Mapper) {
       mapper = Mapper;
+
+      dnsCache = new ConcurrentDictionary<IPAddress, String>();
+
+      localAddresses = Dns.GetHostAddresses(Dns.GetHostName());
     }
 
     #endregion Constructor
@@ -53,18 +62,30 @@ namespace TcpMonitor.Repository.Services {
     }
 
     public async Task<string> GetHostNameAsync(IPEndPoint hostAddress) {
+      if (dnsCache.ContainsKey(hostAddress.Address)) return dnsCache[hostAddress.Address];
+
+      if (localAddresses.Contains(hostAddress.Address)) return Dns.GetHostName();
+
       string addr = hostAddress.Address.ToString();
 
       if (addr == "0.0.0.0" || addr == "::") return "*";
 
       return await Task.Run(() => {
         try {
-          return Dns.GetHostEntry(hostAddress.Address).HostName;
+          dnsCache[hostAddress.Address] = Dns.GetHostEntry(hostAddress.Address).HostName;
+
+          return dnsCache[hostAddress.Address];
         }
         catch {
+          dnsCache[hostAddress.Address] = addr;
+
           return addr;
         }
       });
+    }
+
+    public bool IsLocalAddress(IPEndPoint hostAddress) {
+      return localAddresses.Contains(hostAddress.Address);
     }
 
     public async Task<string> GetProcessNameAsync(int pid) {

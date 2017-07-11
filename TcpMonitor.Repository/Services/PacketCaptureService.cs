@@ -69,6 +69,9 @@ namespace TcpMonitor.Repository.Services {
       try {
         packet = Packet.ParsePacket(args.Packet.LinkLayerType, args.Packet.Data);
       }
+      catch(ArgumentOutOfRangeException) {
+        return;
+      }
       catch(IndexOutOfRangeException) {
         return;
       }

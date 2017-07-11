@@ -31,8 +31,10 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Private Fields
 
     private readonly Object EntityLock = new Object();
+    private readonly Object PacketLock = new Object();
 
     private readonly List<DomainConnection> connections;
+    private readonly List<DomainConnection> packets;
 
     private readonly DispatcherTimer connectionsTimer;
     private readonly DispatcherTimer     displayTimer;
@@ -64,6 +66,7 @@ namespace TcpMonitor.Wpf.Controllers {
       capturePackets    = CapturePackets;
 
       connections = new List<DomainConnection>();
+      packets     = new List<DomainConnection>();
 
       connectionsTimer = new DispatcherTimer();
 
@@ -139,7 +142,43 @@ namespace TcpMonitor.Wpf.Controllers {
         remote.HasData = true;
       });
 
-      if (!locals.Any() && !remotes.Any()) viewModel.DroppedPackets++;
+      if (!locals.Any() && !remotes.Any()) {
+        viewModel.DroppedPackets++;
+
+        if (!viewModel.ViewDropped) return;
+
+        bool exists;
+
+        lock(PacketLock) exists = packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key);
+
+        if (!exists) {
+          lock(PacketLock) {
+            if (!packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key)) {
+              bool isSourceLocal      = connectionService.IsLocalAddress(packet.SourceEndPoint);
+              bool isDestinationLocal = connectionService.IsLocalAddress(packet.DestinationEndPoint);
+
+              DomainConnection connection = mapper.Map<DomainConnection>(packet);
+
+              if ((isSourceLocal && isDestinationLocal) || isSourceLocal) {
+                connection.Key = packet.Key1;
+
+                connection.LocalEndPoint  = packet.SourceEndPoint;
+                connection.RemoteEndPoint = packet.DestinationEndPoint;
+              }
+              else {
+                connection.Key = packet.Key2;
+
+                connection.LocalEndPoint  = packet.DestinationEndPoint;
+                connection.RemoteEndPoint = packet.SourceEndPoint;
+              }
+
+              connection.ResolveHostNames(connectionService).FireAndForget();
+
+              packets.Add(connection);
+            }
+          }
+        }
+      }
     }
 
     private async void onConnectionsTimerTick(object sender, EventArgs args) {
@@ -148,6 +187,14 @@ namespace TcpMonitor.Wpf.Controllers {
       List<DomainConnection> incoming = await connectionService.GetConnectionsAsync();
 
       if (!viewModel.ViewPidZero) incoming.Where(c => c.Pid == 0).ToList().ForEach(c => incoming.Remove(c));
+
+      if (viewModel.ViewDropped) {
+        lock(PacketLock) {
+          packets.Where(p => p.Pid != -1).ToList().ForEach(p => packets.Remove(p));
+
+          incoming.AddRange(packets);
+        }
+      }
 
       var mods = (from row1 in incoming
                   join row2 in connections on row1.Key equals row2.Key
@@ -194,9 +241,9 @@ namespace TcpMonitor.Wpf.Controllers {
                 select new { Mod = row1, Match = row2 }).ToList();
 
       mods.ForEach(set => {
-        if (set.Mod.Pid != 0 && set.Match.Pid != 0 && set.Mod.Pid != set.Match.Pid) return;
+        if (set.Mod.Pid > 0 && set.Match.Pid > 0 && set.Mod.Pid != set.Match.Pid) return;
 
-        if ((set.Mod.Pid != 0 && set.Match.Pid == 0) || set.Mod.ProcessName != set.Match.ProcessName || set.Mod.State != set.Match.State || set.Mod.LocalHostName != set.Match.LocalHostName || set.Mod.RemoteHostName != set.Match.RemoteHostName) {
+        if ((set.Mod.Pid > 0 && set.Match.Pid < 1) || set.Mod.ProcessName != set.Match.ProcessName || set.Mod.State != set.Match.State || set.Mod.LocalHostName != set.Match.LocalHostName || set.Mod.RemoteHostName != set.Match.RemoteHostName) {
           set.Match.HasChanged = set.Mod.State != set.Match.State;
 
           mapper.Map(set.Mod, set.Match);

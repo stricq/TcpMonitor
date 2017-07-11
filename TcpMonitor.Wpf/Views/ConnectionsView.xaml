@@ -27,7 +27,8 @@
       </StackPanel>
 
       <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-        <ToggleButton Content="View PID 0" IsChecked="{Binding Path=ViewPidZero}" Width="75" />
+        <ToggleButton Content="View Dropped" IsChecked="{Binding Path=ViewDropped}" Width="90" Margin="0,0,6,0" />
+        <ToggleButton Content="View PID 0"   IsChecked="{Binding Path=ViewPidZero}" Width="75" />
       </StackPanel>
 
     </Grid>

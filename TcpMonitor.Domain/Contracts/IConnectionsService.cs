@@ -13,6 +13,8 @@ namespace TcpMonitor.Domain.Contracts {
 
     Task<string> GetHostNameAsync(IPEndPoint hostAddress);
 
+    bool IsLocalAddress(IPEndPoint hostAddress);
+
     Task<string> GetProcessNameAsync(int pid);
 
   }

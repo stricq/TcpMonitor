@@ -33,6 +33,15 @@ namespace TcpMonitor.Wpf.Mappings {
                                                                 .ForMember(dest => dest.BytesSent,       opt => opt.Ignore())
                                                                 .ForMember(dest => dest.PacketsReceived, opt => opt.Ignore())
                                                                 .ForMember(dest => dest.BytesReceived,   opt => opt.Ignore());
+
+      config.CreateMap<DomainPacket, DomainConnection>().ForMember(dest => dest.Key,            opt => opt.Ignore())
+                                                        .ForMember(dest => dest.Pid,            opt => opt.UseValue(-1))
+                                                        .ForMember(dest => dest.ProcessName,    opt => opt.UseValue("Unknown"))
+                                                        .ForMember(dest => dest.State,          opt => opt.ResolveUsing(src => src.ConnectionType.StartsWith("TCP") ? "Established" : "Listen"))
+                                                        .ForMember(dest => dest.LocalEndPoint,  opt => opt.Ignore())
+                                                        .ForMember(dest => dest.RemoteEndPoint, opt => opt.Ignore())
+                                                        .ForMember(dest => dest.LocalHostName,  opt => opt.Ignore())
+                                                        .ForMember(dest => dest.RemoteHostName, opt => opt.Ignore());
     }
 
     #endregion IAutoMapperConfiguration

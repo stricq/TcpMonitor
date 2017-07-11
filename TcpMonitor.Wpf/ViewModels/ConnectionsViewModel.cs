@@ -20,6 +20,8 @@ namespace TcpMonitor.Wpf.ViewModels {
 
     public bool viewPidZero;
 
+    public bool viewDropped;
+
     private double memory;
 
     private int tcpConnections;
@@ -48,6 +50,11 @@ namespace TcpMonitor.Wpf.ViewModels {
     public bool ViewPidZero {
       get => viewPidZero;
       set { SetField(ref viewPidZero, value, () => ViewPidZero); }
+    }
+
+    public bool ViewDropped {
+      get => viewDropped;
+      set { SetField(ref viewDropped, value, () => ViewDropped); }
     }
 
     public ObservableCollection<ConnectionViewEntity> Connections {
