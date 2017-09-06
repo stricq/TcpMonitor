@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 using PacketDotNet;
@@ -17,22 +18,25 @@ namespace TcpMonitor.Repository.Services {
 
     #region Private Fields
 
+    private bool initialized;
+
     private Action<DomainPacket> callback;
 
     #endregion Private Fields
 
     #region ICapturePackets Implementation
 
+    [SuppressMessage("ReSharper", "EmptyGeneralCatchClause")]
     public void RegisterPacketCapture(Action<DomainPacket> Callback) {
       callback = Callback;
 
-      CaptureDeviceList devices = CaptureDeviceList.Instance;
+      try {
+        CaptureDeviceList devices = CaptureDeviceList.Instance;
 
-      foreach(ICaptureDevice device in devices) {
-        //
-        // ReSharper disable once EmptyGeneralCatchClause
-        //
-        try {
+        foreach(ICaptureDevice device in devices) {
+          //
+          // ReSharper disable once EmptyGeneralCatchClause
+          //
           device.OnPacketArrival += onDevicePacketArrival;
 
           device.Open(DeviceMode.Normal, 1000);
@@ -40,12 +44,16 @@ namespace TcpMonitor.Repository.Services {
           device.Filter = "(ip or ip6) and (tcp or udp)";
 
           device.StartCapture();
+
+          initialized = true;
         }
-        catch { } // Ignore errors
       }
+      catch { } // Ignore errors
     }
 
     public void UnregisterPacketCapture() {
+      if (!initialized) return;
+
       CaptureDeviceList devices = CaptureDeviceList.Instance;
 
       foreach(ICaptureDevice device in devices) {
