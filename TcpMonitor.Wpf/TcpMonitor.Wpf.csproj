@@ -41,10 +41,10 @@
       <HintPath>..\packages\STR.Common.1.0.16079.1\lib\net45\STR.Common.dll</HintPath>
     </Reference>
     <Reference Include="STR.MvvmCommon, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\STR.MvvmCommon.Mef.1.0.17181.1\lib\net45\STR.MvvmCommon.dll</HintPath>
+      <HintPath>..\packages\STR.MvvmCommon.Mef.1.0.17203.1\lib\net45\STR.MvvmCommon.dll</HintPath>
     </Reference>
-    <Reference Include="STR.MvvmCommon.Mef, Version=1.0.6390.19208, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\STR.MvvmCommon.Mef.1.0.17181.1\lib\net45\STR.MvvmCommon.Mef.dll</HintPath>
+    <Reference Include="STR.MvvmCommon.Mef, Version=1.0.6412.22560, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\STR.MvvmCommon.Mef.1.0.17203.1\lib\net45\STR.MvvmCommon.Mef.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />

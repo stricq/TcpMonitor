@@ -137,8 +137,6 @@ namespace TcpMonitor.Repository.Services {
 
         tcp.Pid = BitConverter.ToInt32(tcpTable, index); index += 4;
 
-//      tcp.ProcessName = GetProcessNameByPid(tcp.Pid);
-
         table.Add(tcp);
       }
 
@@ -184,8 +182,6 @@ namespace TcpMonitor.Repository.Services {
 
         tcp.Pid = BitConverter.ToInt32(tcpTable, index); index += 4;
 
-//      tcp.ProcessName = GetProcessNameByPid(tcp.Pid);
-
         table.Add(tcp);
       }
 
@@ -216,8 +212,6 @@ namespace TcpMonitor.Repository.Services {
         udp.RemoteEndPoint = new IPEndPoint(0, 0);
 
         udp.Pid = BitConverter.ToInt32(udpTable, index); index += 4;
-
-//      udp.ProcessName = GetProcessNameByPid(udp.Pid);
 
         table.Add(udp);
       }
@@ -257,8 +251,6 @@ namespace TcpMonitor.Repository.Services {
         udp.State = "Listen";
 
         udp.Pid = BitConverter.ToInt32(udpTable, index); index += 4;
-
-//      udp.ProcessName = GetProcessNameByPid(udp.Pid);
 
         table.Add(udp);
       }

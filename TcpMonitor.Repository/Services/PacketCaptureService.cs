@@ -51,20 +51,21 @@ namespace TcpMonitor.Repository.Services {
       catch { } // Ignore errors
     }
 
+    [SuppressMessage("ReSharper", "EmptyGeneralCatchClause")]
     public void UnregisterPacketCapture() {
       if (!initialized) return;
 
-      CaptureDeviceList devices = CaptureDeviceList.Instance;
+      try {
+        CaptureDeviceList devices = CaptureDeviceList.Instance;
 
-      foreach(ICaptureDevice device in devices) {
-        //
-        // ReSharper disable once EmptyGeneralCatchClause
-        //
-        try {
+        foreach(ICaptureDevice device in devices) {
+          //
+          // ReSharper disable once EmptyGeneralCatchClause
+          //
           device.StopCapture();
         }
-        catch { } // Ignore errors
       }
+      catch { } // Ignore errors
     }
 
     #endregion ICapturePackets Implementation
