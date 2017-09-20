@@ -22,6 +22,8 @@ namespace TcpMonitor.Repository.Services {
 
     private Action<DomainPacket> callback;
 
+    private CaptureDeviceList devices;
+
     #endregion Private Fields
 
     #region ICapturePackets Implementation
@@ -31,12 +33,14 @@ namespace TcpMonitor.Repository.Services {
       callback = Callback;
 
       try {
-        CaptureDeviceList devices = CaptureDeviceList.Instance;
+        devices = CaptureDeviceList.Instance;
+      }
+      catch {
+        return; // Most likely reason is WinPCAP is not installed
+      }
 
-        foreach(ICaptureDevice device in devices) {
-          //
-          // ReSharper disable once EmptyGeneralCatchClause
-          //
+      foreach(ICaptureDevice device in devices) {
+        try {
           device.OnPacketArrival += onDevicePacketArrival;
 
           device.Open(DeviceMode.Normal, 1000);
@@ -47,25 +51,20 @@ namespace TcpMonitor.Repository.Services {
 
           initialized = true;
         }
+        catch { } // Ignore device errors
       }
-      catch { } // Ignore errors
     }
 
     [SuppressMessage("ReSharper", "EmptyGeneralCatchClause")]
     public void UnregisterPacketCapture() {
       if (!initialized) return;
 
-      try {
-        CaptureDeviceList devices = CaptureDeviceList.Instance;
-
-        foreach(ICaptureDevice device in devices) {
-          //
-          // ReSharper disable once EmptyGeneralCatchClause
-          //
+      foreach(ICaptureDevice device in devices) {
+        try {
           device.StopCapture();
         }
+        catch { } // Ignore device errors
       }
-      catch { } // Ignore errors
     }
 
     #endregion ICapturePackets Implementation
@@ -87,15 +86,10 @@ namespace TcpMonitor.Repository.Services {
 
       int length = args.Packet.Data.Length;
 
-      TcpPacket tcpPacket = packet.Extract(typeof(TcpPacket)) as TcpPacket;
-      UdpPacket udpPacket = packet.Extract(typeof(UdpPacket)) as UdpPacket;
-
       DomainPacket domainPacket = new DomainPacket { Bytes = length };
 
-      if (tcpPacket != null) {
-        IpPacket ipPacket = tcpPacket.ParentPacket as IpPacket;
-
-        if (ipPacket == null) return;
+      if (packet.Extract(typeof(TcpPacket)) is TcpPacket tcpPacket) {
+        if (!(tcpPacket.ParentPacket is IpPacket ipPacket)) return;
 
         domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      tcpPacket.SourcePort);
         domainPacket.DestinationEndPoint = new IPEndPoint(ipPacket.DestinationAddress, tcpPacket.DestinationPort);
@@ -105,10 +99,8 @@ namespace TcpMonitor.Repository.Services {
         domainPacket.Key1 = $"{domainPacket.ConnectionType}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}";
         domainPacket.Key2 = $"{domainPacket.ConnectionType}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}";
       }
-      else if (udpPacket != null) {
-        IpPacket ipPacket = udpPacket.ParentPacket as IpPacket;
-
-        if (ipPacket == null) return;
+      else if (packet.Extract(typeof(UdpPacket)) is UdpPacket udpPacket) {
+        if (!(udpPacket.ParentPacket is IpPacket ipPacket)) return;
 
         domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      udpPacket.SourcePort);
         domainPacket.DestinationEndPoint = new IPEndPoint(ipPacket.DestinationAddress, udpPacket.DestinationPort);

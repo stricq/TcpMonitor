@@ -1,13 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Wpf", "TcpMonitor.Wpf\TcpMonitor.Wpf.csproj", "{E387D901-ED2B-4E21-ADC7-3D3CB899860A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00 Solution Items", "00 Solution Items", "{B55B0962-C6E8-4D82-896F-41118FCBF0CF}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		TcpMonitor.sln.DotSettings.user = TcpMonitor.sln.DotSettings.user
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10 Presentation", "10 Presentation", "{CEFA0970-21ED-4802-BC1E-270CD8B2095B}"
@@ -65,5 +66,8 @@ Global
 		{A794103F-F3E6-49E6-8035-AAA77E5E3D3D} = {2A22484F-1472-4614-9D43-790BCE917DE6}
 		{78026A2B-2C24-4668-B61A-271C0720000B} = {2A22484F-1472-4614-9D43-790BCE917DE6}
 		{3D99E54C-9B80-46EC-9FD4-C10E99D3540F} = {B55B0962-C6E8-4D82-896F-41118FCBF0CF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DB3F0C96-96C2-4C63-873A-3792FCFA610F}
 	EndGlobalSection
 EndGlobal
