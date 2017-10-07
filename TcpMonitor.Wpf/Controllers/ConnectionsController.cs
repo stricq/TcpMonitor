@@ -30,8 +30,11 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Private Fields
 
-    private readonly Object EntityLock = new Object();
-    private readonly Object PacketLock = new Object();
+    private readonly TimeSpan highlightLagTime = TimeSpan.FromSeconds(1);
+    private readonly TimeSpan    closedLagTime = TimeSpan.FromSeconds(3);
+
+    private readonly Object entityLock = new Object();
+    private readonly Object packetLock = new Object();
 
     private readonly List<DomainConnection> connections;
     private readonly List<DomainConnection> packets;
@@ -83,12 +86,12 @@ namespace TcpMonitor.Wpf.Controllers {
 
     public async Task InitializeAsync() {
       connectionsTimer.Tick    += onConnectionsTimerTick;
-      connectionsTimer.Interval = TimeSpan.FromMilliseconds(250);
+      connectionsTimer.Interval = TimeSpan.FromMilliseconds(50);
 
       connectionsTimer.Start();
 
       displayTimer.Tick    += onDisplayTimerTick;
-      displayTimer.Interval = TimeSpan.FromMilliseconds(750);
+      displayTimer.Interval = TimeSpan.FromMilliseconds(50);
 
       displayTimer.Start();
 
@@ -122,24 +125,30 @@ namespace TcpMonitor.Wpf.Controllers {
     private void onPacketCaptured(DomainPacket packet) {
       List<ConnectionViewEntity> locals;
 
-      lock(EntityLock) locals = viewModel.Connections.Where(c => c.Key == packet.Key1).ToList();
+      lock(entityLock) locals = viewModel.Connections.Where(c => c.Key == packet.Key1).ToList();
 
       locals.ForEach(local => {
         local.PacketsSent = (local.PacketsSent ?? 0) + 1;
         local.BytesSent   = (local.BytesSent   ?? 0) + packet.Bytes;
 
         local.HasData = true;
+        local.IsNew   = false;
+
+        local.LastChange = DateTime.Now;
       });
 
       List<ConnectionViewEntity> remotes;
 
-      lock(EntityLock) remotes = viewModel.Connections.Where(c => c.Key == packet.Key2).ToList();
+      lock(entityLock) remotes = viewModel.Connections.Where(c => c.Key == packet.Key2).ToList();
 
       remotes.ForEach(remote => {
         remote.PacketsReceived = (remote.PacketsReceived ?? 0) + 1;
         remote.BytesReceived   = (remote.BytesReceived   ?? 0) + packet.Bytes;
 
         remote.HasData = true;
+        remote.IsNew   = false;
+
+        remote.LastChange = DateTime.Now;
       });
 
       if (!locals.Any() && !remotes.Any()) {
@@ -149,10 +158,10 @@ namespace TcpMonitor.Wpf.Controllers {
 
         bool exists;
 
-        lock(PacketLock) exists = packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key);
+        lock(packetLock) exists = packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key);
 
         if (!exists) {
-          lock(PacketLock) {
+          lock(packetLock) {
             if (!packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key)) {
               bool isSourceLocal      = connectionService.IsLocalAddress(packet.SourceEndPoint);
               bool isDestinationLocal = connectionService.IsLocalAddress(packet.DestinationEndPoint);
@@ -184,12 +193,14 @@ namespace TcpMonitor.Wpf.Controllers {
     private async void onConnectionsTimerTick(object sender, EventArgs args) {
       connectionsTimer.Stop();
 
+      Stopwatch watch = Stopwatch.StartNew();
+
       List<DomainConnection> incoming = await connectionService.GetConnectionsAsync();
 
       if (!viewModel.ViewPidZero) incoming.Where(c => c.Pid == 0).ToList().ForEach(c => incoming.Remove(c));
 
       if (viewModel.ViewDropped) {
-        lock(PacketLock) {
+        lock(packetLock) {
           packets.Where(p => p.Pid != -1).ToList().ForEach(p => packets.Remove(p));
 
           incoming.AddRange(packets);
@@ -220,21 +231,27 @@ namespace TcpMonitor.Wpf.Controllers {
 
       dels.ForEach(del => connections.Remove(del));
 
+      viewModel.ConnectionsPass = watch.ElapsedMilliseconds;
+
       connectionsTimer.Start();
     }
 
     private void onDisplayTimerTick(object sender, EventArgs args) {
       displayTimer.Stop();
 
-      viewModel.Connections.ForEach(c => {
+      Stopwatch watch = Stopwatch.StartNew();
+
+      DateTime now = DateTime.Now;
+
+      viewModel.Connections.Where(c => now - c.LastChange > highlightLagTime).ForEach(c => {
         c.IsNew      = false;
         c.HasChanged = false;
         c.HasData    = false;
       });
 
-      List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => c.IsClosed).ToList();
+      List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => now - c.LastChange > closedLagTime && c.IsClosed).ToList();
 
-      lock(EntityLock) closed.ForEach(c => viewModel.Connections.Remove(c));
+      lock(entityLock) closed.ForEach(c => viewModel.Connections.Remove(c));
 
       var mods = (from row1 in connections
                   join row2 in viewModel.Connections on row1.Key equals row2.Key
@@ -260,17 +277,18 @@ namespace TcpMonitor.Wpf.Controllers {
 
       added.ForEach(add => add.IsNew = true);
 
-      lock(EntityLock) viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
+      lock(entityLock) viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
 
       List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
                                          join row2 in connections on row1.Key equals row2.Key into collGroup
                                          from sub  in collGroup.DefaultIfEmpty()
                                         where sub == null
+                                           && !row1.IsClosed
                                        select row1).ToList();
 
-      dels.ForEach(del => del.IsClosed = true);
+      dels.ForEach(del => { del.IsClosed = true; del.LastChange = DateTime.Now; });
 
-      lock(EntityLock) viewModel.Connections.Sort(comparer);
+      lock(entityLock) viewModel.Connections.Sort(comparer);
 
       if (viewModel.IsFiltered && !String.IsNullOrEmpty(viewModel.ConnectionFilter)) {
         try {
@@ -288,6 +306,8 @@ namespace TcpMonitor.Wpf.Controllers {
       using(Process process = Process.GetCurrentProcess()) {
         viewModel.Memory = process.WorkingSet64 / 1024.0 / 1024.0;
       }
+
+      viewModel.UiPass = watch.ElapsedMilliseconds;
 
       displayTimer.Start();
     }

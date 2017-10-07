@@ -16,11 +16,14 @@ namespace TcpMonitor.Wpf.ViewModels {
 
     #region Private Fields
 
-    public bool isFiltered;
+    private bool isFiltered;
 
-    public bool viewPidZero;
+    private bool viewPidZero;
 
-    public bool viewDropped;
+    private bool viewDropped;
+
+    private long uiPass;
+    private long connectionsPass;
 
     private double memory;
 
@@ -75,6 +78,16 @@ namespace TcpMonitor.Wpf.ViewModels {
     public int DroppedPackets {
       get => droppedPackets;
       set { SetField(ref droppedPackets, value, () => DroppedPackets); }
+    }
+
+    public long UiPass {
+      get => uiPass;
+      set { SetField(ref uiPass, value, () => UiPass); }
+    }
+
+    public long ConnectionsPass {
+      get => uiPass;
+      set { SetField(ref connectionsPass, value, () => ConnectionsPass); }
     }
 
     public double Memory {

@@ -43,6 +43,8 @@ namespace TcpMonitor.Wpf.ViewEntities {
 
     public string Key { get; set; }
 
+    public DateTime LastChange { get; set; }
+
     public bool IsVisible {
       get => isVisible;
       set { SetField(ref isVisible, value, () => IsVisible); }

@@ -119,6 +119,10 @@
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
@@ -147,15 +151,27 @@
 
       <Separator Grid.Column="5" />
 
+      <StatusBarItem Grid.Column="6">
+        <TextBlock Text="{Binding Path=UiPass, StringFormat='UI Redraw: {0:N0}ms'}" Margin="0" Foreground="White" />
+      </StatusBarItem>
+
       <Separator Grid.Column="7" />
 
       <StatusBarItem Grid.Column="8">
-        <TextBlock Text="{Binding Path=Memory, StringFormat='Memory: {0:N1}MB'}" Margin="0" Foreground="White" />
+        <TextBlock Text="{Binding Path=ConnectionsPass, StringFormat='Load Connections: {0:N0}ms'}" Margin="0" Foreground="White" />
       </StatusBarItem>
 
       <Separator Grid.Column="9" />
 
-      <StatusBarItem Grid.Column="10" Width="17" />
+      <Separator Grid.Column="11" />
+
+      <StatusBarItem Grid.Column="12">
+        <TextBlock Text="{Binding Path=Memory, StringFormat='Memory: {0:N1}MB'}" Margin="0" Foreground="White" />
+      </StatusBarItem>
+
+      <Separator Grid.Column="13" />
+
+      <StatusBarItem Grid.Column="14" Width="17" />
     </StatusBar>
 
   </Grid>

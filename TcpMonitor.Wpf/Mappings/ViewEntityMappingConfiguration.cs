@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 
 using AutoMapper;
 
@@ -32,7 +33,8 @@ namespace TcpMonitor.Wpf.Mappings {
                                                                 .ForMember(dest => dest.PacketsSent,     opt => opt.Ignore())
                                                                 .ForMember(dest => dest.BytesSent,       opt => opt.Ignore())
                                                                 .ForMember(dest => dest.PacketsReceived, opt => opt.Ignore())
-                                                                .ForMember(dest => dest.BytesReceived,   opt => opt.Ignore());
+                                                                .ForMember(dest => dest.BytesReceived,   opt => opt.Ignore())
+                                                                .ForMember(dest => dest.LastChange,      opt => opt.UseValue(DateTime.Now));
 
       config.CreateMap<DomainPacket, DomainConnection>().ForMember(dest => dest.Key,            opt => opt.Ignore())
                                                         .ForMember(dest => dest.Pid,            opt => opt.UseValue(-1))
