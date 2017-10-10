@@ -136,7 +136,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\network-icon-21485.png" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TcpMonitor.Domain\TcpMonitor.Domain.csproj">
       <Project>{f211fdf1-f515-4ece-8b13-f9e0ec1efa99}</Project>
