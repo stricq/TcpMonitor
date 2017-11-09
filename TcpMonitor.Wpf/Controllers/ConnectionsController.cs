@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
@@ -42,6 +43,8 @@ namespace TcpMonitor.Wpf.Controllers {
     private readonly DispatcherTimer connectionsTimer;
     private readonly DispatcherTimer     displayTimer;
 
+    private readonly ConcurrentDictionary<DomainConnection, int> asyncPackets;
+
     private readonly ConnectionsViewModel viewModel;
 
     private readonly ConnectionViewEntityComparer comparer;
@@ -70,6 +73,8 @@ namespace TcpMonitor.Wpf.Controllers {
 
       connections = new List<DomainConnection>();
       packets     = new List<DomainConnection>();
+
+      asyncPackets = new ConcurrentDictionary<DomainConnection, int>();
 
       connectionsTimer = new DispatcherTimer();
 
@@ -131,8 +136,9 @@ namespace TcpMonitor.Wpf.Controllers {
         local.PacketsSent = (local.PacketsSent ?? 0) + 1;
         local.BytesSent   = (local.BytesSent   ?? 0) + packet.Bytes;
 
-        local.HasData = true;
-        local.IsNew   = false;
+        local.HasData  = true;
+        local.IsNew    = false;
+        local.IsClosed = false;
 
         local.LastChange = DateTime.Now;
       });
@@ -145,8 +151,9 @@ namespace TcpMonitor.Wpf.Controllers {
         remote.PacketsReceived = (remote.PacketsReceived ?? 0) + 1;
         remote.BytesReceived   = (remote.BytesReceived   ?? 0) + packet.Bytes;
 
-        remote.HasData = true;
-        remote.IsNew   = false;
+        remote.HasData  = true;
+        remote.IsNew    = false;
+        remote.IsClosed = false;
 
         remote.LastChange = DateTime.Now;
       });
@@ -184,6 +191,8 @@ namespace TcpMonitor.Wpf.Controllers {
               connection.ResolveHostNames(connectionService).FireAndForget();
 
               packets.Add(connection);
+
+              asyncPackets[connection] = 0;
             }
           }
         }
@@ -201,7 +210,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
       if (viewModel.ViewDropped) {
         lock(packetLock) {
-          packets.Where(p => p.Pid != -1).ToList().ForEach(p => packets.Remove(p));
+          packets.Where(p => p.Pid != -1).ToList().ForEach(p => { packets.Remove(p); asyncPackets.TryRemove(p, out int t); });
 
           incoming.AddRange(packets);
         }
@@ -250,6 +259,10 @@ namespace TcpMonitor.Wpf.Controllers {
       });
 
       List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => now - c.LastChange > closedLagTime && c.IsClosed).ToList();
+
+      //if (!viewModel.ViewDropped) closed.AddRange(viewModel.Connections.Where(c => c.Pid == -1));
+
+      //if (!viewModel.ViewPidZero) closed.AddRange(viewModel.Connections.Where(c => c.Pid == 0));
 
       lock(entityLock) closed.ForEach(c => viewModel.Connections.Remove(c));
 

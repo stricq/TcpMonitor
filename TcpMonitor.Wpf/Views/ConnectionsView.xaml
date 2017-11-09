@@ -152,7 +152,7 @@
       <Separator Grid.Column="5" />
 
       <StatusBarItem Grid.Column="6">
-        <TextBlock Text="{Binding Path=UiPass, StringFormat='UI Redraw: {0:N0}ms'}" Margin="0" Foreground="White" />
+        <TextBlock Text="{Binding Path=UiPass, StringFormat='UI List Refresh: {0:N0}ms'}" Margin="0" Foreground="White" />
       </StatusBarItem>
 
       <Separator Grid.Column="7" />

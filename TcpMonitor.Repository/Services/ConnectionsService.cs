@@ -30,7 +30,7 @@ namespace TcpMonitor.Repository.Services {
 
     private readonly IPAddress[] localAddresses;
 
-    private readonly Func<List<Connection>>[] tables = { GetExtendedTcpTable4, GetExtendedTcpTable6, GetExtendedUdpTable4, GetExtendedUdpTable6 };
+    private readonly Func<List<Connection>>[] tables = { getExtendedTcpTable4, getExtendedTcpTable6, getExtendedUdpTable4, getExtendedUdpTable6 };
 
     private readonly IMapper mapper;
 
@@ -107,7 +107,7 @@ namespace TcpMonitor.Repository.Services {
 
     #region Private Methods
 
-    private static List<Connection> GetExtendedTcpTable4() {
+    private static List<Connection> getExtendedTcpTable4() {
       IpHelperApi.GetExtendedTcpTable(null, out int size, true, AfInet.AF_INET, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
       byte[] tcpTable = new byte[size];
@@ -123,17 +123,17 @@ namespace TcpMonitor.Repository.Services {
       for(int i = 0; i < entries; ++i) {
         Connection tcp = new Connection { ConnectionType = "TCP" };
 
-        tcp.State = ConvertState(BitConverter.ToInt32(tcpTable, index)); index += 4;
+        tcp.State = convertState(BitConverter.ToInt32(tcpTable, index)); index += 4;
 
         uint localAddr = BitConverter.ToUInt32(tcpTable, index); index += 4;
         uint localPort = BitConverter.ToUInt32(tcpTable, index); index += 4;
 
-        tcp.LocalEndPoint = new IPEndPoint((long)localAddr, (int)ConvertPort(localPort));
+        tcp.LocalEndPoint = new IPEndPoint((long)localAddr, (int)convertPort(localPort));
 
         uint remoteAddr = BitConverter.ToUInt32(tcpTable, index); index += 4;
         uint remotePort = BitConverter.ToUInt32(tcpTable, index); index += 4;
 
-        tcp.RemoteEndPoint = new IPEndPoint((long)remoteAddr, (int)ConvertPort(remotePort));
+        tcp.RemoteEndPoint = new IPEndPoint((long)remoteAddr, (int)convertPort(remotePort));
 
         tcp.Pid = BitConverter.ToInt32(tcpTable, index); index += 4;
 
@@ -143,7 +143,7 @@ namespace TcpMonitor.Repository.Services {
       return table;
     }
 
-    private static List<Connection> GetExtendedTcpTable6() {
+    private static List<Connection> getExtendedTcpTable6() {
       IpHelperApi.GetExtendedTcpTable(null, out int size, true, AfInet.AF_INET6, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
       byte[] tcpTable = new byte[size];
@@ -167,18 +167,16 @@ namespace TcpMonitor.Repository.Services {
         uint localScope = BitConverter.ToUInt32(tcpTable, index); index += 4;
         uint localPort  = BitConverter.ToUInt32(tcpTable, index); index += 4;
 
-//      tcp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, localScope), (int)ConvertPort(localPort));
-        tcp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, 0), (int)ConvertPort(localPort));
+        tcp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, localScope), (int)convertPort(localPort));
 
         Array.Copy(tcpTable, index, remoteAddr, 0, 16); index += 16;
 
         uint remoteScope = BitConverter.ToUInt32(tcpTable, index); index += 4;
         uint remotePort  = BitConverter.ToUInt32(tcpTable, index); index += 4;
 
-//      tcp.RemoteEndPoint = new IPEndPoint(new IPAddress(remoteAddr, remoteScope), (int)ConvertPort(remotePort));
-        tcp.RemoteEndPoint = new IPEndPoint(new IPAddress(remoteAddr, 0), (int)ConvertPort(remotePort));
+        tcp.RemoteEndPoint = new IPEndPoint(new IPAddress(remoteAddr, remoteScope), (int)convertPort(remotePort));
 
-        tcp.State = ConvertState(BitConverter.ToInt32(tcpTable, index)); index += 4;
+        tcp.State = convertState(BitConverter.ToInt32(tcpTable, index)); index += 4;
 
         tcp.Pid = BitConverter.ToInt32(tcpTable, index); index += 4;
 
@@ -188,7 +186,7 @@ namespace TcpMonitor.Repository.Services {
       return table;
     }
 
-    private static List<Connection> GetExtendedUdpTable4() {
+    private static List<Connection> getExtendedUdpTable4() {
       IpHelperApi.GetExtendedUdpTable(null, out int size, true, AfInet.AF_INET, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
 
       byte[] udpTable = new byte[size];
@@ -207,7 +205,7 @@ namespace TcpMonitor.Repository.Services {
         uint localAddr = BitConverter.ToUInt32(udpTable, index); index += 4;
         uint localPort = BitConverter.ToUInt32(udpTable, index); index += 4;
 
-        udp.LocalEndPoint = new IPEndPoint(localAddr, (int)ConvertPort(localPort));
+        udp.LocalEndPoint = new IPEndPoint(localAddr, (int)convertPort(localPort));
 
         udp.RemoteEndPoint = new IPEndPoint(0, 0);
 
@@ -219,7 +217,7 @@ namespace TcpMonitor.Repository.Services {
       return table;
     }
 
-    private static List<Connection> GetExtendedUdpTable6() {
+    private static List<Connection> getExtendedUdpTable6() {
       IpHelperApi.GetExtendedUdpTable(null, out int size, true, AfInet.AF_INET6, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
 
       byte[] udpTable = new byte[size];
@@ -243,8 +241,7 @@ namespace TcpMonitor.Repository.Services {
         uint localScope = BitConverter.ToUInt32(udpTable, index); index += 4;
         uint localPort  = BitConverter.ToUInt32(udpTable, index); index += 4;
 
-//      udp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, localScope), (int)ConvertPort(localPort));
-        udp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, 0), (int)ConvertPort(localPort));
+        udp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, localScope), (int)convertPort(localPort));
 
         udp.RemoteEndPoint = new IPEndPoint(new IPAddress(remoteAddr, 0), 0);
 
@@ -258,7 +255,7 @@ namespace TcpMonitor.Repository.Services {
       return table;
     }
 
-    private static string ConvertState(int state) {
+    private static string convertState(int state) {
       switch(state) {
         case State.MIB_TCP_STATE_CLOSED     : return "Closed";
         case State.MIB_TCP_STATE_LISTEN     : return "Listen";
@@ -277,13 +274,8 @@ namespace TcpMonitor.Repository.Services {
       return "Unknown";
     }
 
-    private static uint ConvertPort(uint port) {
-      byte[] bytes = BitConverter.GetBytes(port);
-
-      uint lo = bytes[0];
-      uint hi = bytes[1];
-
-      return (lo << 8) | hi;
+    private static uint convertPort(uint port) {
+      return ((port & 0xff) << 8) | (port >> 8);
     }
 
     #endregion Private Methods
