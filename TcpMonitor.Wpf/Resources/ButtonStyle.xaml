@@ -1,12 +1,12 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-  <Style TargetType="{x:Type Button}">
+  <Style TargetType="{x:Type ToggleButton}">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="Button">
+        <ControlTemplate TargetType="ToggleButton">
           <Grid>
-            <Border Name="Background" CornerRadius="2" Padding="6,3,6,4" Background="{StaticResource TabItemSelectedGradient}" BorderThickness="1" BorderBrush="{StaticResource TabItemBorderSelectedColor}">
+            <Border Name="Background" CornerRadius="2" Padding="6,3,6,4" Background="{StaticResource TabItemSelectedGradient}" BorderThickness="1" BorderBrush="{StaticResource TabItemBorderSelectedColor}" Width="{TemplateBinding Width}">
               <ContentPresenter Name="ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" TextBlock.Foreground="White"
                                 VerticalAlignment="{TemplateBinding VerticalAlignment}" HorizontalAlignment="Center" />
             </Border>
@@ -23,6 +23,9 @@
               <Setter TargetName="Background" Property="Background"  Value="{StaticResource TabItemDisabledGradient}" />
               <Setter TargetName="Background" Property="BorderBrush" Value="{StaticResource TabItemBorderUnSelectedColor}" />
               <Setter TargetName="ContentPresenter" Property="TextBlock.Foreground" Value="{StaticResource StatusBarBorderColor}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Background" Property="Background" Value="{StaticResource ToggleHighlightGradient}" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>

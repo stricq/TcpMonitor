@@ -31,7 +31,7 @@ namespace TcpMonitor.Wpf {
     public App() {
       container = new MvvmContainer();
 
-      container.Initialize(() => new AggregateCatalog(new DirectoryCatalog(Directory.GetCurrentDirectory(), "TcpMonitor.Wpf.exe"),
+      container.Initialize(() => new AggregateCatalog(new DirectoryCatalog(Directory.GetCurrentDirectory(), "TcpMonitor.exe"),
                                                       new DirectoryCatalog(Directory.GetCurrentDirectory(), "TcpMonitor.*.dll"),
                                                       new DirectoryCatalog(Directory.GetCurrentDirectory(), "Str.*.dll")));
     }

@@ -64,7 +64,7 @@ namespace TcpMonitor.Repository.Services {
     public async Task<string> GetHostNameAsync(IPEndPoint hostAddress) {
       if (dnsCache.ContainsKey(hostAddress.Address)) return dnsCache[hostAddress.Address];
 
-      if (localAddresses.Contains(hostAddress.Address)) return Dns.GetHostName();
+      if (localAddresses.Contains(hostAddress.Address) || hostAddress.Address.IsIPv6SiteLocal) return Dns.GetHostName();
 
       string addr = hostAddress.Address.ToString();
 
@@ -85,7 +85,7 @@ namespace TcpMonitor.Repository.Services {
     }
 
     public bool IsLocalAddress(IPEndPoint hostAddress) {
-      return localAddresses.Contains(hostAddress.Address);
+      return localAddresses.Contains(hostAddress.Address) || hostAddress.Address.IsIPv6SiteLocal;
     }
 
     public async Task<string> GetProcessNameAsync(int pid) {

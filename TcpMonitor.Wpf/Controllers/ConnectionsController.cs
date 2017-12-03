@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
@@ -32,7 +31,7 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Private Fields
 
     private readonly TimeSpan highlightLagTime = TimeSpan.FromSeconds(1);
-    private readonly TimeSpan    closedLagTime = TimeSpan.FromSeconds(3);
+    private readonly TimeSpan    closedLagTime = TimeSpan.FromSeconds(1);
 
     private readonly Object entityLock = new Object();
     private readonly Object packetLock = new Object();
@@ -42,8 +41,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
     private readonly DispatcherTimer connectionsTimer;
     private readonly DispatcherTimer     displayTimer;
-
-    private readonly ConcurrentDictionary<DomainConnection, int> asyncPackets;
+    private readonly DispatcherTimer      memoryTimer;
 
     private readonly ConnectionsViewModel viewModel;
 
@@ -74,11 +72,9 @@ namespace TcpMonitor.Wpf.Controllers {
       connections = new List<DomainConnection>();
       packets     = new List<DomainConnection>();
 
-      asyncPackets = new ConcurrentDictionary<DomainConnection, int>();
-
       connectionsTimer = new DispatcherTimer();
-
-      displayTimer = new DispatcherTimer();
+          displayTimer = new DispatcherTimer();
+           memoryTimer = new DispatcherTimer();
 
       comparer = new ConnectionViewEntityComparer();
     }
@@ -99,6 +95,11 @@ namespace TcpMonitor.Wpf.Controllers {
       displayTimer.Interval = TimeSpan.FromMilliseconds(50);
 
       displayTimer.Start();
+
+      memoryTimer.Tick    += onMemoryTimerTick;
+      memoryTimer.Interval = TimeSpan.FromSeconds(1);
+
+      memoryTimer.Start();
 
       registerMessages();
 
@@ -191,8 +192,6 @@ namespace TcpMonitor.Wpf.Controllers {
               connection.ResolveHostNames(connectionService).FireAndForget();
 
               packets.Add(connection);
-
-              asyncPackets[connection] = 0;
             }
           }
         }
@@ -210,7 +209,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
       if (viewModel.ViewDropped) {
         lock(packetLock) {
-          packets.Where(p => p.Pid != -1).ToList().ForEach(p => { packets.Remove(p); asyncPackets.TryRemove(p, out int t); });
+          packets.Where(p => p.Pid != -1).ToList().ForEach(p => { packets.Remove(p); });
 
           incoming.AddRange(packets);
         }
@@ -259,10 +258,6 @@ namespace TcpMonitor.Wpf.Controllers {
       });
 
       List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => now - c.LastChange > closedLagTime && c.IsClosed).ToList();
-
-      //if (!viewModel.ViewDropped) closed.AddRange(viewModel.Connections.Where(c => c.Pid == -1));
-
-      //if (!viewModel.ViewPidZero) closed.AddRange(viewModel.Connections.Where(c => c.Pid == 0));
 
       lock(entityLock) closed.ForEach(c => viewModel.Connections.Remove(c));
 
@@ -313,16 +308,18 @@ namespace TcpMonitor.Wpf.Controllers {
       }
       else viewModel.Connections.ForEach(c => c.IsVisible = true);
 
+      viewModel.UiPass = watch.ElapsedMilliseconds;
+
+      displayTimer.Start();
+    }
+
+    private void onMemoryTimerTick(object sender, EventArgs args) {
       viewModel.TcpConnections = viewModel.Connections.Count(c => c.ConnectionType.StartsWith("TCP"));
       viewModel.UdpConnections = viewModel.Connections.Count(c => c.ConnectionType.StartsWith("UDP"));
 
       using(Process process = Process.GetCurrentProcess()) {
         viewModel.Memory = process.WorkingSet64 / 1024.0 / 1024.0;
       }
-
-      viewModel.UiPass = watch.ElapsedMilliseconds;
-
-      displayTimer.Start();
     }
 
     #endregion Private Methods
