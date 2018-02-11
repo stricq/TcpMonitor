@@ -1,4 +1,4 @@
-﻿<Application x:Class="TcpMonitor.Wpf.App" StartupUri="Views/TcpMonitorView.xaml"
+﻿<Application x:Class="TcpMonitor.Wpf.App" x:ClassModifier="internal" StartupUri="Views/TcpMonitorView.xaml"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -9,6 +9,7 @@
 
         <ResourceDictionary Source="Resources/ButtonStyle.xaml" />
         <ResourceDictionary Source="Resources/ListViewStyle.xaml" />
+        <ResourceDictionary Source="Resources/ScrollViewerStyle.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>

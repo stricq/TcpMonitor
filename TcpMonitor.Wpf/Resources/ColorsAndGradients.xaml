@@ -86,4 +86,9 @@
     <GradientStop Color="#FF5A2C74" Offset="1" />
   </LinearGradientBrush>
 
+  <LinearGradientBrush x:Key="ToggleHighlightGradientHorizontal" EndPoint="1,0.5" StartPoint="0,0.5">
+    <GradientStop Color="#FF8E45BF" Offset="0" />
+    <GradientStop Color="#FF5A2C74" Offset="1" />
+  </LinearGradientBrush>
+
 </ResourceDictionary>

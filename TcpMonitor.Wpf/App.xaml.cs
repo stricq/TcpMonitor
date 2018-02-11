@@ -18,7 +18,7 @@ using TcpMonitor.Domain.Contracts;
 
 namespace TcpMonitor.Wpf {
 
-  public partial class App : Application {
+  internal sealed partial class App : Application {
 
     #region Private Fields
 

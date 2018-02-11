@@ -3,7 +3,7 @@
 
 namespace TcpMonitor.Wpf.Views {
 
-  public partial class TcpMonitorView : Window {
+  internal sealed partial class TcpMonitorView : Window {
 
     public TcpMonitorView() {
       InitializeComponent();

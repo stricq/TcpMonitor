@@ -26,7 +26,7 @@ using TcpMonitor.Wpf.ViewModels;
 namespace TcpMonitor.Wpf.Controllers {
 
   [Export(typeof(IController))]
-  public class ConnectionsController : IController {
+  public sealed class ConnectionsController : IController {
 
     #region Private Fields
 
@@ -87,12 +87,12 @@ namespace TcpMonitor.Wpf.Controllers {
 
     public async Task InitializeAsync() {
       connectionsTimer.Tick    += onConnectionsTimerTick;
-      connectionsTimer.Interval = TimeSpan.FromMilliseconds(50);
+      connectionsTimer.Interval = TimeSpan.FromMilliseconds(25);
 
       connectionsTimer.Start();
 
       displayTimer.Tick    += onDisplayTimerTick;
-      displayTimer.Interval = TimeSpan.FromMilliseconds(50);
+      displayTimer.Interval = TimeSpan.FromMilliseconds(25);
 
       displayTimer.Start();
 

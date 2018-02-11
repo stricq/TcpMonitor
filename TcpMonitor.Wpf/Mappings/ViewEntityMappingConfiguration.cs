@@ -12,7 +12,7 @@ using TcpMonitor.Wpf.ViewEntities;
 namespace TcpMonitor.Wpf.Mappings {
 
   [Export(typeof(IAutoMapperConfiguration))]
-  public class ViewEntityMappingConfiguration : IAutoMapperConfiguration {
+  public sealed class ViewEntityMappingConfiguration : IAutoMapperConfiguration {
 
     #region IAutoMapperConfiguration
 

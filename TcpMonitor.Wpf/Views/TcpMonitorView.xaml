@@ -1,4 +1,4 @@
-﻿<Window x:Class="TcpMonitor.Wpf.Views.TcpMonitorView"
+﻿<Window x:Class="TcpMonitor.Wpf.Views.TcpMonitorView" x:ClassModifier="internal"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:v="clr-namespace:TcpMonitor.Wpf.Views"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
