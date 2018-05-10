@@ -87,12 +87,12 @@ namespace TcpMonitor.Wpf.Controllers {
 
     public async Task InitializeAsync() {
       connectionsTimer.Tick    += onConnectionsTimerTick;
-      connectionsTimer.Interval = TimeSpan.FromMilliseconds(25);
+      connectionsTimer.Interval = TimeSpan.FromMilliseconds(20);
 
       connectionsTimer.Start();
 
       displayTimer.Tick    += onDisplayTimerTick;
-      displayTimer.Interval = TimeSpan.FromMilliseconds(25);
+      displayTimer.Interval = TimeSpan.FromMilliseconds(20);
 
       displayTimer.Start();
 
@@ -307,6 +307,8 @@ namespace TcpMonitor.Wpf.Controllers {
         catch(ArgumentException) { }
       }
       else viewModel.Connections.ForEach(c => c.IsVisible = true);
+
+      if (viewModel.IsEstablished) viewModel.Connections.Where(c => c.IsVisible).ForEach(c => c.IsVisible = c.State == "Established");
 
       viewModel.UiPass = watch.ElapsedMilliseconds;
 

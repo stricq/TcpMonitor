@@ -16,6 +16,8 @@ namespace TcpMonitor.Wpf.ViewModels {
 
     #region Private Fields
 
+    private bool isEstablished;
+
     private bool isFiltered;
 
     private bool viewPidZero;
@@ -43,6 +45,11 @@ namespace TcpMonitor.Wpf.ViewModels {
     public string ConnectionFilter {
       get => connectionFilter;
       set { SetField(ref connectionFilter, value, () => ConnectionFilter); }
+    }
+
+    public bool IsEstablished {
+      get => isEstablished;
+      set { SetField(ref isEstablished, value, () => IsEstablished); }
     }
 
     public bool IsFiltered {
