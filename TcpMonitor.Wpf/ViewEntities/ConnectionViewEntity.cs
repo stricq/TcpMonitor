@@ -164,7 +164,7 @@ namespace TcpMonitor.Wpf.ViewEntities {
     #region Overrides
 
     public override string ToString() {
-      return $"{Pid}\n{ProcessName}\n{ConnectionType}\n{LocalAddress}\n{LocalPort}\n{RemoteAddress}\n{RemotePort}\n{State}";
+      return $"{Pid}\n{ProcessName}\n{ConnectionType}\n{LocalAddress}\n{LocalHostName}\n{LocalPort}\n{RemoteAddress}\n{RemoteHostName}\n{RemotePort}\n{State}";
     }
 
     #endregion Overrides

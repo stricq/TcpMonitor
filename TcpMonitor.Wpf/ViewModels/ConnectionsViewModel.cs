@@ -12,7 +12,7 @@ namespace TcpMonitor.Wpf.ViewModels {
   [Export]
   [ViewModel(nameof(ConnectionsViewModel))]
   [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-  public class ConnectionsViewModel : ObservableObject {
+  public sealed class ConnectionsViewModel : ObservableObject {
 
     #region Private Fields
 
