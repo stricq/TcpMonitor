@@ -3,7 +3,7 @@
 
 namespace TcpMonitor.Wpf.Views {
 
-  public partial class ConnectionsView : UserControl {
+  internal sealed partial class ConnectionsView : UserControl {
 
     public ConnectionsView() {
       InitializeComponent();
