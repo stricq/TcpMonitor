@@ -87,28 +87,37 @@ namespace TcpMonitor.Repository.Services {
       int length = args.Packet.Data.Length;
 
       DomainPacket domainPacket = new DomainPacket { Bytes = length };
+      try {
+        if (packet.Extract(typeof(TcpPacket)) is TcpPacket tcpPacket) {
+          if (!(tcpPacket.ParentPacket is IPPacket ipPacket)) return;
 
-      if (packet.Extract(typeof(TcpPacket)) is TcpPacket tcpPacket) {
-        if (!(tcpPacket.ParentPacket is IPPacket ipPacket)) return;
+          domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      tcpPacket.SourcePort);
+          domainPacket.DestinationEndPoint = new IPEndPoint(ipPacket.DestinationAddress, tcpPacket.DestinationPort);
 
-        domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      tcpPacket.SourcePort);
-        domainPacket.DestinationEndPoint = new IPEndPoint(ipPacket.DestinationAddress, tcpPacket.DestinationPort);
+          domainPacket.ConnectionType = ipPacket.Version == IPVersion.IPv6 ? "TCPv6" : "TCP";
 
-        domainPacket.ConnectionType = ipPacket.Version == IPVersion.IPv6 ? "TCPv6" : "TCP";
+          domainPacket.Key1 = $"{domainPacket.ConnectionType}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}";
+          domainPacket.Key2 = $"{domainPacket.ConnectionType}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}";
+        }
+        else if (packet.Extract(typeof(UdpPacket)) is UdpPacket udpPacket) {
+          if (!(udpPacket.ParentPacket is IPPacket ipPacket)) return;
 
-        domainPacket.Key1 = $"{domainPacket.ConnectionType}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}";
-        domainPacket.Key2 = $"{domainPacket.ConnectionType}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}";
+          domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      udpPacket.SourcePort);
+          domainPacket.DestinationEndPoint = new IPEndPoint(ipPacket.DestinationAddress, udpPacket.DestinationPort);
+
+          domainPacket.ConnectionType = ipPacket.Version == IPVersion.IPv6 ? "UDPv6" : "UDP";
+
+          domainPacket.Key1 = $"{domainPacket.ConnectionType}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}";
+          domainPacket.Key2 = $"{domainPacket.ConnectionType}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}";
+        }
       }
-      else if (packet.Extract(typeof(UdpPacket)) is UdpPacket udpPacket) {
-        if (!(udpPacket.ParentPacket is IPPacket ipPacket)) return;
+      catch(Exception ex) {
+        //
+        // PacketDotNet can't parse some TCPv6 packets...
+        //
+        if (ex is IndexOutOfRangeException) return;
 
-        domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      udpPacket.SourcePort);
-        domainPacket.DestinationEndPoint = new IPEndPoint(ipPacket.DestinationAddress, udpPacket.DestinationPort);
-
-        domainPacket.ConnectionType = ipPacket.Version == IPVersion.IPv6 ? "UDPv6" : "UDP";
-
-        domainPacket.Key1 = $"{domainPacket.ConnectionType}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}";
-        domainPacket.Key2 = $"{domainPacket.ConnectionType}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}";
+        throw;
       }
 
       callback(domainPacket);
