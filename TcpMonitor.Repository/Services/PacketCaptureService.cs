@@ -3,6 +3,8 @@ using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
+using Newtonsoft.Json;
+
 using PacketDotNet;
 
 using SharpPcap;
@@ -77,10 +79,7 @@ namespace TcpMonitor.Repository.Services {
       try {
         packet = Packet.ParsePacket(args.Packet.LinkLayerType, args.Packet.Data);
       }
-      catch(ArgumentOutOfRangeException) {
-        return;
-      }
-      catch(IndexOutOfRangeException) {
+      catch(Exception ex) when (ex is ArgumentOutOfRangeException || ex is IndexOutOfRangeException) {
         return;
       }
 
@@ -111,13 +110,11 @@ namespace TcpMonitor.Repository.Services {
           domainPacket.Key2 = $"{domainPacket.ConnectionType}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}";
         }
       }
-      catch(Exception ex) {
+      catch(Exception ex) when (ex is ArgumentOutOfRangeException) {
         //
         // PacketDotNet can't parse some TCPv6 packets...
         //
-        if (ex is IndexOutOfRangeException) return;
-
-        throw;
+        return;
       }
 
       callback(domainPacket);
