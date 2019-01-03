@@ -11,13 +11,13 @@ using TcpMonitor.Repository.Models.IpService;
 namespace TcpMonitor.Repository.Mappings {
 
   [Export(typeof(IAutoMapperConfiguration))]
-  public class DomainModelMappingConfiguration : IAutoMapperConfiguration {
+  public sealed class DomainModelMappingConfiguration : IAutoMapperConfiguration {
 
     #region IAutoMapperConfiguration
 
     public void RegisterMappings(IMapperConfigurationExpression config) {
-      config.CreateMap<Connection, DomainConnection>().ForMember(dest => dest.Key,            opt => opt.ResolveUsing(src => src.ConnectionType.StartsWith("TCP") ? $"{src.ConnectionType}/{src.LocalEndPoint.Address}/{src.LocalEndPoint.Port}/{src.RemoteEndPoint.Address}/{src.RemoteEndPoint.Port}"
-                                                                                                                                                                  : $"{src.ConnectionType}/{src.LocalEndPoint.Address}/{src.LocalEndPoint.Port}"))
+      config.CreateMap<Connection, DomainConnection>().ForMember(dest => dest.Key,            opt => opt.MapFrom(src => src.ConnectionType.StartsWith("TCP") ? $"{src.ConnectionType}/{src.LocalEndPoint.Address}/{src.LocalEndPoint.Port}/{src.RemoteEndPoint.Address}/{src.RemoteEndPoint.Port}"
+                                                                                                                                                             : $"{src.ConnectionType}/{src.LocalEndPoint.Address}/{src.LocalEndPoint.Port}"))
                                                       .ForMember(dest => dest.LocalHostName,  opt => opt.Ignore())
                                                       .ForMember(dest => dest.RemoteHostName, opt => opt.Ignore());
 

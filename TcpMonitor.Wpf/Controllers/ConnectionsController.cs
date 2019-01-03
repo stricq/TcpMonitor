@@ -87,12 +87,12 @@ namespace TcpMonitor.Wpf.Controllers {
 
     public async Task InitializeAsync() {
       connectionsTimer.Tick    += onConnectionsTimerTick;
-      connectionsTimer.Interval = TimeSpan.FromMilliseconds(20);
+      connectionsTimer.Interval = TimeSpan.FromMilliseconds(10);
 
       connectionsTimer.Start();
 
       displayTimer.Tick    += onDisplayTimerTick;
-      displayTimer.Interval = TimeSpan.FromMilliseconds(20);
+      displayTimer.Interval = TimeSpan.FromMilliseconds(10);
 
       displayTimer.Start();
 

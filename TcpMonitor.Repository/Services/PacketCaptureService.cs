@@ -3,8 +3,6 @@ using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
-using Newtonsoft.Json;
-
 using PacketDotNet;
 
 using SharpPcap;
@@ -86,6 +84,7 @@ namespace TcpMonitor.Repository.Services {
       int length = args.Packet.Data.Length;
 
       DomainPacket domainPacket = new DomainPacket { Bytes = length };
+
       try {
         if (packet.Extract(typeof(TcpPacket)) is TcpPacket tcpPacket) {
           if (!(tcpPacket.ParentPacket is IPPacket ipPacket)) return;
