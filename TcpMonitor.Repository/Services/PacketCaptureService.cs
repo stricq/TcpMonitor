@@ -86,7 +86,7 @@ namespace TcpMonitor.Repository.Services {
       DomainPacket domainPacket = new DomainPacket { Bytes = length };
 
       try {
-        if (packet.Extract(typeof(TcpPacket)) is TcpPacket tcpPacket) {
+        if (packet.Extract<TcpPacket>() is TcpPacket tcpPacket) {
           if (!(tcpPacket.ParentPacket is IPPacket ipPacket)) return;
 
           domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      tcpPacket.SourcePort);
@@ -97,7 +97,7 @@ namespace TcpMonitor.Repository.Services {
           domainPacket.Key1 = $"{domainPacket.ConnectionType}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}";
           domainPacket.Key2 = $"{domainPacket.ConnectionType}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}";
         }
-        else if (packet.Extract(typeof(UdpPacket)) is UdpPacket udpPacket) {
+        else if (packet.Extract<UdpPacket>() is UdpPacket udpPacket) {
           if (!(udpPacket.ParentPacket is IPPacket ipPacket)) return;
 
           domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      udpPacket.SourcePort);
