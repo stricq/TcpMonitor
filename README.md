@@ -3,7 +3,7 @@ TCP/UDP Connection Monitor
 
 Works like the SysInternals tool TCPView with the added feature of filtering the list of connections.
 
-Visual Studio 2017 .Net 4.7
+Visual Studio 2019 .Net Core 3.1
 
 # Color Highlights Key
 
