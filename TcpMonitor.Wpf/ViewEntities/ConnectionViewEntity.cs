@@ -1,6 +1,6 @@
 ﻿using System;
 
-using STR.MvvmCommon;
+using Str.MvvmCommon.Core;
 
 
 namespace TcpMonitor.Wpf.ViewEntities {

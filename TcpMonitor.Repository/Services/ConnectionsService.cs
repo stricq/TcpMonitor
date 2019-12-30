@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 using AutoMapper;
 
-using STR.Common.Extensions;
+using Str.Common.Extensions;
 
 using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;

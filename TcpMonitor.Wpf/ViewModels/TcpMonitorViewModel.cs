@@ -4,7 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 
-using STR.MvvmCommon;
+using Str.MvvmCommon.Core;
 
 using TcpMonitor.Wpf.ViewEntities;
 

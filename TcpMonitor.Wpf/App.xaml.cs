@@ -8,10 +8,10 @@ using System.Windows;
 
 using AutoMapper;
 
-using STR.Common.Extensions;
+using Str.Common.Extensions;
 
-using STR.MvvmCommon.Contracts;
-using STR.MvvmCommon.Mef;
+using Str.MvvmCommon.Contracts;
+using Str.MvvmCommon.Core;
 
 using TcpMonitor.Domain.Contracts;
 
@@ -31,7 +31,7 @@ namespace TcpMonitor.Wpf {
     public App() {
       container = new MvvmContainer();
 
-      container.Initialize(() => new AggregateCatalog(new DirectoryCatalog(Directory.GetCurrentDirectory(), "TcpMonitor.exe"),
+      container.Initialize(() => new AggregateCatalog(new DirectoryCatalog(Directory.GetCurrentDirectory(), "TcpMonitor.dll"),
                                                       new DirectoryCatalog(Directory.GetCurrentDirectory(), "TcpMonitor.*.dll"),
                                                       new DirectoryCatalog(Directory.GetCurrentDirectory(), "Str.*.dll")));
     }

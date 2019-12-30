@@ -8,10 +8,10 @@ using System.Windows.Threading;
 
 using AutoMapper;
 
-using STR.Common.Messages;
+using Str.Common.Messages;
 
-using STR.MvvmCommon;
-using STR.MvvmCommon.Contracts;
+using Str.MvvmCommon.Contracts;
+using Str.MvvmCommon.Core;
 
 using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
@@ -49,8 +49,6 @@ namespace TcpMonitor.Wpf.Controllers {
       Dispatcher.CurrentDispatcher.UnhandledException += onCurrentDispatcherUnhandledException;
 
       TaskScheduler.UnobservedTaskException += onUnobservedTaskException;
-
-      System.Windows.Forms.Application.ThreadException += onThreadException;
 
       viewModel = ViewModel;
 
@@ -112,14 +110,14 @@ namespace TcpMonitor.Wpf.Controllers {
       if (ex == null) return;
 
       if (e.IsTerminating) MessageBox.Show(ex.Message, "Fatal Domain Unhandled Exception");
-      else messenger.SendUi(new ApplicationErrorMessage { HeaderText = "Domain Unhandled Exception", Exception = ex });
+      else messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Domain Unhandled Exception", Exception = ex });
     }
 
     private void onCurrentDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
       if (e.Exception == null) return;
 
       if (isStartupComplete) {
-        messenger.SendUi(new ApplicationErrorMessage { HeaderText = "Dispatcher Unhandled Exception", Exception = e.Exception });
+        messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Dispatcher Unhandled Exception", Exception = e.Exception });
 
         e.Handled = true;
       }
@@ -137,7 +135,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
       foreach(Exception ex in e.Exception.InnerExceptions) {
         if (isStartupComplete) {
-          messenger.SendUi(new ApplicationErrorMessage { HeaderText = "Unobserved Task Exception", Exception = ex });
+          messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Unobserved Task Exception", Exception = ex });
         }
         else {
           MessageBox.Show(ex.Message, "Fatal Unobserved Task Exception");
@@ -152,7 +150,7 @@ namespace TcpMonitor.Wpf.Controllers {
     private void onThreadException(object sender, ThreadExceptionEventArgs e) {
       if (e.Exception == null) return;
 
-      messenger.SendUi(new ApplicationErrorMessage { HeaderText = "Thread Exception", Exception = e.Exception });
+      messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Thread Exception", Exception = e.Exception });
     }
 
     private async Task saveSettings() {

@@ -10,10 +10,10 @@ using System.Windows.Threading;
 
 using AutoMapper;
 
-using STR.Common.Extensions;
-using STR.Common.Messages;
+using Str.Common.Extensions;
+using Str.Common.Messages;
 
-using STR.MvvmCommon.Contracts;
+using Str.MvvmCommon.Contracts;
 
 using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
