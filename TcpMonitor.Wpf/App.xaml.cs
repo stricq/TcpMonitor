@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 using AutoMapper;
@@ -57,13 +55,7 @@ namespace TcpMonitor.Wpf {
 
         container.RegisterInstance(mapperConfiguration.CreateMapper());
 
-        IEnumerable<IController> controllers = container.GetAll<IController>();
-
-        IOrderedEnumerable<IGrouping<int, IController>> groups = controllers.GroupBy(c => c.InitializePriority).OrderBy(g => g.Key);
-
-        foreach(IGrouping<int, IController> group in groups) {
-          Task.Run(() => group.ForEachAsync(controller => controller.InitializeAsync())).Wait();
-        }
+        container.InitializeControllers();
       }
       catch(Exception ex) {
         while(ex.InnerException != null) ex = ex.InnerException;
