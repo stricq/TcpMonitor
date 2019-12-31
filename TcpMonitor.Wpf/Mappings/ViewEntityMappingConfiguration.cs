@@ -37,7 +37,7 @@ namespace TcpMonitor.Wpf.Mappings {
                                                                 .ForMember(dest => dest.LastChange,      opt => opt.MapFrom(src => DateTime.Now));
 
       config.CreateMap<DomainPacket, DomainConnection>().ForMember(dest => dest.Key,            opt => opt.Ignore())
-                                                        .ForMember(dest => dest.Pid,            opt => opt.MapFrom(SelectionRangeConverter => -1))
+                                                        .ForMember(dest => dest.Pid,            opt => opt.MapFrom(src => -1))
                                                         .ForMember(dest => dest.ProcessName,    opt => opt.MapFrom(src => "Unknown"))
                                                         .ForMember(dest => dest.State,          opt => opt.MapFrom(src => src.ConnectionType.StartsWith("TCP") ? "Established" : "Listen"))
                                                         .ForMember(dest => dest.LocalEndPoint,  opt => opt.Ignore())

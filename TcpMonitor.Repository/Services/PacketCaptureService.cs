@@ -20,7 +20,7 @@ namespace TcpMonitor.Repository.Services {
 
     private bool initialized;
 
-    private Action<DomainPacket> callback;
+    private Action<DomainPacket> callbackAction;
 
     private CaptureDeviceList devices;
 
@@ -29,8 +29,8 @@ namespace TcpMonitor.Repository.Services {
     #region ICapturePackets Implementation
 
     [SuppressMessage("ReSharper", "EmptyGeneralCatchClause")]
-    public void RegisterPacketCapture(Action<DomainPacket> Callback) {
-      callback = Callback;
+    public void RegisterPacketCapture(Action<DomainPacket> callback) {
+      callbackAction = callback;
 
       try {
         devices = CaptureDeviceList.Instance;
@@ -41,7 +41,7 @@ namespace TcpMonitor.Repository.Services {
 
       foreach(ICaptureDevice device in devices) {
         try {
-          device.OnPacketArrival += onDevicePacketArrival;
+          device.OnPacketArrival += OnDevicePacketArrival;
 
           device.Open(DeviceMode.Normal, 1000);
 
@@ -71,7 +71,7 @@ namespace TcpMonitor.Repository.Services {
 
     #region Private Methods
 
-    private void onDevicePacketArrival(object sender, CaptureEventArgs args) {
+    private void OnDevicePacketArrival(object sender, CaptureEventArgs args) {
       Packet packet;
 
       try {
@@ -86,7 +86,7 @@ namespace TcpMonitor.Repository.Services {
       DomainPacket domainPacket = new DomainPacket { Bytes = length };
 
       try {
-        if (packet.Extract<TcpPacket>() is TcpPacket tcpPacket) {
+        if (packet.Extract<TcpPacket>() is { } tcpPacket) {
           if (!(tcpPacket.ParentPacket is IPPacket ipPacket)) return;
 
           domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      tcpPacket.SourcePort);
@@ -97,7 +97,7 @@ namespace TcpMonitor.Repository.Services {
           domainPacket.Key1 = $"{domainPacket.ConnectionType}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}";
           domainPacket.Key2 = $"{domainPacket.ConnectionType}/{domainPacket.DestinationEndPoint.Address}/{domainPacket.DestinationEndPoint.Port}/{domainPacket.SourceEndPoint.Address}/{domainPacket.SourceEndPoint.Port}";
         }
-        else if (packet.Extract<UdpPacket>() is UdpPacket udpPacket) {
+        else if (packet.Extract<UdpPacket>() is { } udpPacket) {
           if (!(udpPacket.ParentPacket is IPPacket ipPacket)) return;
 
           domainPacket.SourceEndPoint      = new IPEndPoint(ipPacket.SourceAddress,      udpPacket.SourcePort);
@@ -116,7 +116,7 @@ namespace TcpMonitor.Repository.Services {
         return;
       }
 
-      callback(domainPacket);
+      callbackAction(domainPacket);
     }
 
     #endregion Private Methods

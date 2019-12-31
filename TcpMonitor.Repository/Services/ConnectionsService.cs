@@ -30,7 +30,7 @@ namespace TcpMonitor.Repository.Services {
 
     private readonly IPAddress[] localAddresses;
 
-    private readonly Func<List<Connection>>[] tables = { getExtendedTcpTable4, getExtendedTcpTable6, getExtendedUdpTable4, getExtendedUdpTable6 };
+    private readonly Func<List<Connection>>[] tables = { GetExtendedTcpTable4, GetExtendedTcpTable6, GetExtendedUdpTable4, GetExtendedUdpTable6 };
 
     private readonly IMapper mapper;
 
@@ -39,8 +39,8 @@ namespace TcpMonitor.Repository.Services {
     #region Constructor
 
     [ImportingConstructor]
-    public ConnectionsService(IMapper Mapper) {
-      mapper = Mapper;
+    public ConnectionsService(IMapper mapper) {
+      this.mapper = mapper;
 
       dnsCache = new ConcurrentDictionary<IPAddress, String>();
 
@@ -93,9 +93,9 @@ namespace TcpMonitor.Repository.Services {
 
       return await Task.Run(() => {
         try {
-          using(Process p = Process.GetProcessById(pid)) {
-            return p.ProcessName;
-          }
+          using Process p = Process.GetProcessById(pid);
+
+          return p.ProcessName;
         }
         catch {
           return "Unknown";
@@ -107,12 +107,12 @@ namespace TcpMonitor.Repository.Services {
 
     #region Private Methods
 
-    private static List<Connection> getExtendedTcpTable4() {
+    private static List<Connection> GetExtendedTcpTable4() {
       IpHelperApi.GetExtendedTcpTable(null, out int size, true, AfInet.AF_INET, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
       byte[] tcpTable = new byte[size];
 
-      IpHelperApi.GetExtendedTcpTable(tcpTable, out size, true, AfInet.AF_INET, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
+      IpHelperApi.GetExtendedTcpTable(tcpTable, out _, true, AfInet.AF_INET, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
       int index = 0;
 
@@ -121,19 +121,22 @@ namespace TcpMonitor.Repository.Services {
       List<Connection> table = new List<Connection>(entries);
 
       for(int i = 0; i < entries; ++i) {
-        Connection tcp = new Connection { ConnectionType = "TCP" };
+        Connection tcp = new Connection {
+          ConnectionType = "TCP",
+          State          = ConvertState(BitConverter.ToInt32(tcpTable, index))
+        };
 
-        tcp.State = convertState(BitConverter.ToInt32(tcpTable, index)); index += 4;
+        index += 4;
 
         uint localAddr = BitConverter.ToUInt32(tcpTable, index); index += 4;
         uint localPort = BitConverter.ToUInt32(tcpTable, index); index += 4;
 
-        tcp.LocalEndPoint = new IPEndPoint((long)localAddr, (int)convertPort(localPort));
+        tcp.LocalEndPoint = new IPEndPoint(localAddr, (int)ConvertPort(localPort));
 
         uint remoteAddr = BitConverter.ToUInt32(tcpTable, index); index += 4;
         uint remotePort = BitConverter.ToUInt32(tcpTable, index); index += 4;
 
-        tcp.RemoteEndPoint = new IPEndPoint((long)remoteAddr, (int)convertPort(remotePort));
+        tcp.RemoteEndPoint = new IPEndPoint(remoteAddr, (int)ConvertPort(remotePort));
 
         tcp.Pid = BitConverter.ToInt32(tcpTable, index); index += 4;
 
@@ -143,12 +146,12 @@ namespace TcpMonitor.Repository.Services {
       return table;
     }
 
-    private static List<Connection> getExtendedTcpTable6() {
+    private static List<Connection> GetExtendedTcpTable6() {
       IpHelperApi.GetExtendedTcpTable(null, out int size, true, AfInet.AF_INET6, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
       byte[] tcpTable = new byte[size];
 
-      IpHelperApi.GetExtendedTcpTable(tcpTable, out size, true, AfInet.AF_INET6, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
+      IpHelperApi.GetExtendedTcpTable(tcpTable, out _, true, AfInet.AF_INET6, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
       int index = 0;
 
@@ -167,16 +170,16 @@ namespace TcpMonitor.Repository.Services {
         uint localScope = BitConverter.ToUInt32(tcpTable, index); index += 4;
         uint localPort  = BitConverter.ToUInt32(tcpTable, index); index += 4;
 
-        tcp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, localScope), (int)convertPort(localPort));
+        tcp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, localScope), (int)ConvertPort(localPort));
 
         Array.Copy(tcpTable, index, remoteAddr, 0, 16); index += 16;
 
         uint remoteScope = BitConverter.ToUInt32(tcpTable, index); index += 4;
         uint remotePort  = BitConverter.ToUInt32(tcpTable, index); index += 4;
 
-        tcp.RemoteEndPoint = new IPEndPoint(new IPAddress(remoteAddr, remoteScope), (int)convertPort(remotePort));
+        tcp.RemoteEndPoint = new IPEndPoint(new IPAddress(remoteAddr, remoteScope), (int)ConvertPort(remotePort));
 
-        tcp.State = convertState(BitConverter.ToInt32(tcpTable, index)); index += 4;
+        tcp.State = ConvertState(BitConverter.ToInt32(tcpTable, index)); index += 4;
 
         tcp.Pid = BitConverter.ToInt32(tcpTable, index); index += 4;
 
@@ -186,12 +189,12 @@ namespace TcpMonitor.Repository.Services {
       return table;
     }
 
-    private static List<Connection> getExtendedUdpTable4() {
+    private static List<Connection> GetExtendedUdpTable4() {
       IpHelperApi.GetExtendedUdpTable(null, out int size, true, AfInet.AF_INET, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
 
       byte[] udpTable = new byte[size];
 
-      IpHelperApi.GetExtendedUdpTable(udpTable, out size, true, AfInet.AF_INET, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
+      IpHelperApi.GetExtendedUdpTable(udpTable, out _, true, AfInet.AF_INET, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
 
       int index = 0;
 
@@ -205,7 +208,7 @@ namespace TcpMonitor.Repository.Services {
         uint localAddr = BitConverter.ToUInt32(udpTable, index); index += 4;
         uint localPort = BitConverter.ToUInt32(udpTable, index); index += 4;
 
-        udp.LocalEndPoint = new IPEndPoint(localAddr, (int)convertPort(localPort));
+        udp.LocalEndPoint = new IPEndPoint(localAddr, (int)ConvertPort(localPort));
 
         udp.RemoteEndPoint = new IPEndPoint(0, 0);
 
@@ -217,12 +220,12 @@ namespace TcpMonitor.Repository.Services {
       return table;
     }
 
-    private static List<Connection> getExtendedUdpTable6() {
+    private static List<Connection> GetExtendedUdpTable6() {
       IpHelperApi.GetExtendedUdpTable(null, out int size, true, AfInet.AF_INET6, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
 
       byte[] udpTable = new byte[size];
 
-      IpHelperApi.GetExtendedUdpTable(udpTable, out size, true, AfInet.AF_INET6, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
+      IpHelperApi.GetExtendedUdpTable(udpTable, out _, true, AfInet.AF_INET6, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
 
       int index = 0;
 
@@ -241,7 +244,7 @@ namespace TcpMonitor.Repository.Services {
         uint localScope = BitConverter.ToUInt32(udpTable, index); index += 4;
         uint localPort  = BitConverter.ToUInt32(udpTable, index); index += 4;
 
-        udp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, localScope), (int)convertPort(localPort));
+        udp.LocalEndPoint = new IPEndPoint(new IPAddress(localAddr, localScope), (int)ConvertPort(localPort));
 
         udp.RemoteEndPoint = new IPEndPoint(new IPAddress(remoteAddr, 0), 0);
 
@@ -255,26 +258,25 @@ namespace TcpMonitor.Repository.Services {
       return table;
     }
 
-    private static string convertState(int state) {
-      switch(state) {
-        case State.MIB_TCP_STATE_CLOSED     : return "Closed";
-        case State.MIB_TCP_STATE_LISTEN     : return "Listen";
-        case State.MIB_TCP_STATE_SYN_SENT   : return "SYN Sent";
-        case State.MIB_TCP_STATE_SYN_RCVD   : return "SYN Recieved";
-        case State.MIB_TCP_STATE_ESTAB      : return "Established";
-        case State.MIB_TCP_STATE_FIN_WAIT1  : return "FIN Wait 1";
-        case State.MIB_TCP_STATE_FIN_WAIT2  : return "FIN Wait 2";
-        case State.MIB_TCP_STATE_CLOSE_WAIT : return "Close Wait";
-        case State.MIB_TCP_STATE_CLOSING    : return "Closing";
-        case State.MIB_TCP_STATE_LAST_ACK   : return "Last ACK";
-        case State.MIB_TCP_STATE_TIME_WAIT  : return "Time Wait";
-        case State.MIB_TCP_STATE_DELETE_TCB : return "Delete TCB";
-      }
-
-      return "Unknown";
+    private static string ConvertState(int state) {
+      return state switch {
+        State.MIB_TCP_STATE_CLOSED     => "Closed",
+        State.MIB_TCP_STATE_LISTEN     => "Listen",
+        State.MIB_TCP_STATE_SYN_SENT   => "SYN Sent",
+        State.MIB_TCP_STATE_SYN_RCVD   => "SYN Recieved",
+        State.MIB_TCP_STATE_ESTAB      => "Established",
+        State.MIB_TCP_STATE_FIN_WAIT1  => "FIN Wait 1",
+        State.MIB_TCP_STATE_FIN_WAIT2  => "FIN Wait 2",
+        State.MIB_TCP_STATE_CLOSE_WAIT => "Close Wait",
+        State.MIB_TCP_STATE_CLOSING    => "Closing",
+        State.MIB_TCP_STATE_LAST_ACK   => "Last ACK",
+        State.MIB_TCP_STATE_TIME_WAIT  => "Time Wait",
+        State.MIB_TCP_STATE_DELETE_TCB => "Delete TCB",
+        _                              => "Unknown"
+      };
     }
 
-    private static uint convertPort(uint port) {
+    private static uint ConvertPort(uint port) {
       return ((port & 0xff) << 8) | (port >> 8);
     }
 

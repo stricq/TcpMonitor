@@ -7,7 +7,7 @@ namespace TcpMonitor.Domain.Contracts {
 
   public interface ICapturePackets {
 
-    void RegisterPacketCapture(Action<DomainPacket> Callback);
+    void RegisterPacketCapture(Action<DomainPacket> callback);
 
     void UnregisterPacketCapture();
 

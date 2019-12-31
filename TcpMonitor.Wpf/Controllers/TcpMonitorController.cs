@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -41,21 +40,21 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Constructor
 
     [ImportingConstructor]
-    public TcpMonitorController(TcpMonitorViewModel ViewModel, IMessenger Messenger, IMapper Mapper, IWindowSettingsRepository SettingsRepository) {
-      if (Application.Current != null) Application.Current.DispatcherUnhandledException += onCurrentDispatcherUnhandledException;
+    public TcpMonitorController(TcpMonitorViewModel viewModel, IMessenger messenger, IMapper mapper, IWindowSettingsRepository settingsRepository) {
+      if (Application.Current != null) Application.Current.DispatcherUnhandledException += OnCurrentDispatcherUnhandledException;
 
-      AppDomain.CurrentDomain.UnhandledException += onDomainUnhandledException;
+      AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
 
-      Dispatcher.CurrentDispatcher.UnhandledException += onCurrentDispatcherUnhandledException;
+      Dispatcher.CurrentDispatcher.UnhandledException += OnCurrentDispatcherUnhandledException;
 
-      TaskScheduler.UnobservedTaskException += onUnobservedTaskException;
+      TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-      viewModel = ViewModel;
+      this.viewModel = viewModel;
 
-      messenger = Messenger;
-         mapper = Mapper;
+      this.messenger = messenger;
+         this.mapper = mapper;
 
-      settingsRepository = SettingsRepository;
+      this.settingsRepository = settingsRepository;
     }
 
     #endregion Constructor
@@ -67,35 +66,35 @@ namespace TcpMonitor.Wpf.Controllers {
     public async Task InitializeAsync() {
       viewModel.Settings = mapper.Map<WindowSettingsViewEntity>(await settingsRepository.LoadWindowSettingsAsync());
 
-      registerCommands();
+      RegisterCommands();
     }
 
     #endregion IController Implementation
 
     #region Commands
 
-    private void registerCommands() {
-      viewModel.Initialized = new RelayCommand<EventArgs>(onInitialized);
-      viewModel.Loaded      = new RelayCommand<RoutedEventArgs>(onLoaded);
-      viewModel.Closing     = new RelayCommand<CancelEventArgs>(onClosing);
+    private void RegisterCommands() {
+      viewModel.Initialized = new RelayCommand<EventArgs>(OnInitialized);
+      viewModel.Loaded      = new RelayCommand<RoutedEventArgs>(OnLoaded);
+      viewModel.Closing     = new RelayCommand<CancelEventArgs>(OnClosing);
     }
 
-    private void onInitialized(EventArgs args) {
+    private void OnInitialized(EventArgs args) {
       isStartupComplete = true;
 
       messenger.Send(new ApplicationInitializedMessage());
     }
 
-    private void onLoaded(RoutedEventArgs args) {
+    private void OnLoaded(RoutedEventArgs args) {
       messenger.Send(new ApplicationLoadedMessage());
     }
 
-    private void onClosing(CancelEventArgs args) {
+    private void OnClosing(CancelEventArgs args) {
       ApplicationClosingMessage message = new ApplicationClosingMessage();
 
       Task.Run(() => messenger.SendAsync(message)).Wait();
 
-      if (!message.Cancel && viewModel.Settings.AreSettingsChanged) Task.Run(saveSettings).Wait();
+      if (!message.Cancel && viewModel.Settings.AreSettingsChanged) Task.Run(SaveSettings).Wait();
 
       args.Cancel = message.Cancel;
     }
@@ -104,7 +103,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Private Methods
 
-    private void onDomainUnhandledException(object sender, UnhandledExceptionEventArgs e) {
+    private void OnDomainUnhandledException(object sender, UnhandledExceptionEventArgs e) {
       Exception ex = e.ExceptionObject as Exception;
 
       if (ex == null) return;
@@ -113,7 +112,7 @@ namespace TcpMonitor.Wpf.Controllers {
       else messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Domain Unhandled Exception", Exception = ex });
     }
 
-    private void onCurrentDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
+    private void OnCurrentDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
       if (e.Exception == null) return;
 
       if (isStartupComplete) {
@@ -130,7 +129,7 @@ namespace TcpMonitor.Wpf.Controllers {
       }
     }
 
-    private void onUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) {
+    private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) {
       if (e.Exception == null || e.Exception.InnerExceptions.Count == 0) return;
 
       foreach(Exception ex in e.Exception.InnerExceptions) {
@@ -147,13 +146,7 @@ namespace TcpMonitor.Wpf.Controllers {
       e.SetObserved();
     }
 
-    private void onThreadException(object sender, ThreadExceptionEventArgs e) {
-      if (e.Exception == null) return;
-
-      messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Thread Exception", Exception = e.Exception });
-    }
-
-    private async Task saveSettings() {
+    private async Task SaveSettings() {
       await settingsRepository.SaveWindowSettingsAsync(mapper.Map<DomainWindowSettings>(viewModel.Settings));
     }
 

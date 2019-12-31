@@ -58,16 +58,16 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Constructor
 
     [ImportingConstructor]
-    public ConnectionsController(ConnectionsViewModel ViewModel, IMapper Mapper, IMessenger Messenger, IConnectionsService ConnectionService, ICapturePackets CapturePackets) {
-      viewModel = ViewModel;
+    public ConnectionsController(ConnectionsViewModel viewModel, IMapper mapper, IMessenger messenger, IConnectionsService connectionService, ICapturePackets capturePackets) {
+      this.viewModel = viewModel;
 
-      viewModel.Connections = new ObservableCollection<ConnectionViewEntity>();
+      this.viewModel.Connections = new ObservableCollection<ConnectionViewEntity>();
 
-      mapper    = Mapper;
-      messenger = Messenger;
+      this.mapper    = mapper;
+      this.messenger = messenger;
 
-      connectionService = ConnectionService;
-      capturePackets    = CapturePackets;
+      this.connectionService = connectionService;
+      this.capturePackets    = capturePackets;
 
       connections = new List<DomainConnection>();
       packets     = new List<DomainConnection>();
@@ -86,22 +86,22 @@ namespace TcpMonitor.Wpf.Controllers {
     public int InitializePriority { get; } = 100;
 
     public async Task InitializeAsync() {
-      connectionsTimer.Tick    += onConnectionsTimerTick;
+      connectionsTimer.Tick    += OnConnectionsTimerTick;
       connectionsTimer.Interval = TimeSpan.FromMilliseconds(10);
 
       connectionsTimer.Start();
 
-      displayTimer.Tick    += onDisplayTimerTick;
+      displayTimer.Tick    += OnDisplayTimerTick;
       displayTimer.Interval = TimeSpan.FromMilliseconds(10);
 
       displayTimer.Start();
 
-      memoryTimer.Tick    += onMemoryTimerTick;
+      memoryTimer.Tick    += OnMemoryTimerTick;
       memoryTimer.Interval = TimeSpan.FromSeconds(1);
 
       memoryTimer.Start();
 
-      registerMessages();
+      RegisterMessages();
 
       await Task.CompletedTask;
     }
@@ -110,17 +110,17 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Messages
 
-    private void registerMessages() {
-      messenger.Register<ApplicationLoadedMessage>(this, onApplicationLoaded);
+    private void RegisterMessages() {
+      messenger.Register<ApplicationLoadedMessage>(this, OnApplicationLoaded);
 
-      messenger.Register<ApplicationClosingMessage>(this, onApplicationClosing);
+      messenger.Register<ApplicationClosingMessage>(this, OnApplicationClosing);
     }
 
-    private void onApplicationLoaded(ApplicationLoadedMessage message) {
-      capturePackets.RegisterPacketCapture(onPacketCaptured);
+    private void OnApplicationLoaded(ApplicationLoadedMessage message) {
+      capturePackets.RegisterPacketCapture(OnPacketCaptured);
     }
 
-    private void onApplicationClosing(ApplicationClosingMessage message) {
+    private void OnApplicationClosing(ApplicationClosingMessage message) {
       capturePackets.UnregisterPacketCapture();
     }
 
@@ -128,7 +128,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Private Methods
 
-    private void onPacketCaptured(DomainPacket packet) {
+    private void OnPacketCaptured(DomainPacket packet) {
       List<ConnectionViewEntity> locals;
 
       lock(entityLock) locals = viewModel.Connections.Where(c => c.Key == packet.Key1).ToList();
@@ -198,7 +198,7 @@ namespace TcpMonitor.Wpf.Controllers {
       }
     }
 
-    private async void onConnectionsTimerTick(object sender, EventArgs args) {
+    private async void OnConnectionsTimerTick(object sender, EventArgs args) {
       connectionsTimer.Stop();
 
       Stopwatch watch = Stopwatch.StartNew();
@@ -244,7 +244,7 @@ namespace TcpMonitor.Wpf.Controllers {
       connectionsTimer.Start();
     }
 
-    private void onDisplayTimerTick(object sender, EventArgs args) {
+    private void OnDisplayTimerTick(object sender, EventArgs args) {
       displayTimer.Stop();
 
       Stopwatch watch = Stopwatch.StartNew();
@@ -315,13 +315,13 @@ namespace TcpMonitor.Wpf.Controllers {
       displayTimer.Start();
     }
 
-    private void onMemoryTimerTick(object sender, EventArgs args) {
+    private void OnMemoryTimerTick(object sender, EventArgs args) {
       viewModel.TcpConnections = viewModel.Connections.Count(c => c.ConnectionType.StartsWith("TCP"));
       viewModel.UdpConnections = viewModel.Connections.Count(c => c.ConnectionType.StartsWith("UDP"));
 
-      using(Process process = Process.GetCurrentProcess()) {
-        viewModel.Memory = process.WorkingSet64 / 1024.0 / 1024.0;
-      }
+      using Process process = Process.GetCurrentProcess();
+
+      viewModel.Memory = process.WorkingSet64 / 1024.0 / 1024.0;
     }
 
     #endregion Private Methods

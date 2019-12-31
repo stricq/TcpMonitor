@@ -1,7 +1,9 @@
-﻿
+﻿using System.Diagnostics.CodeAnalysis;
+
 
 namespace TcpMonitor.Repository.IpService {
 
+  [SuppressMessage("ReSharper", "InconsistentNaming")]
   public static class State {
 
     public const int MIB_TCP_STATE_CLOSED     =  1;

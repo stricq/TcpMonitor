@@ -16,14 +16,14 @@ namespace TcpMonitor.Repository.Repositories {
 
     #region Private Fields
 
-    private static readonly string windowSettingsFile;
+    private static readonly string WindowSettingsFile;
 
     #endregion Private Fields
 
     #region Constructor
 
     static SettingsRepository() {
-      windowSettingsFile  = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"STR Programming Services\TCP Monitor\WindowSettings.json");
+      WindowSettingsFile  = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"STR Programming Services\TCP Monitor\WindowSettings.json");
     }
 
     #endregion Constructor
@@ -33,8 +33,8 @@ namespace TcpMonitor.Repository.Repositories {
     public async Task<DomainWindowSettings> LoadWindowSettingsAsync() {
       DomainWindowSettings settings;
 
-      if (await Task.Run(() => File.Exists(windowSettingsFile))) {
-        settings = await Task.Run(() => JsonConvert.DeserializeObject<DomainWindowSettings>(File.ReadAllText(windowSettingsFile)));
+      if (await Task.Run(() => File.Exists(WindowSettingsFile))) {
+        settings = await Task.Run(() => JsonConvert.DeserializeObject<DomainWindowSettings>(File.ReadAllText(WindowSettingsFile)));
       }
       else settings = new DomainWindowSettings {
         WindowW = 1024,
@@ -50,9 +50,9 @@ namespace TcpMonitor.Repository.Repositories {
     public async Task SaveWindowSettingsAsync(DomainWindowSettings settings) {
       string json = await Task.Run(() => JsonConvert.SerializeObject(settings, Formatting.Indented));
 
-      if (!await Task.Run(() => File.Exists(windowSettingsFile))) await Task.Run(() => Directory.CreateDirectory(Path.GetDirectoryName(windowSettingsFile)));
+      if (!await Task.Run(() => File.Exists(WindowSettingsFile))) await Task.Run(() => Directory.CreateDirectory(Path.GetDirectoryName(WindowSettingsFile)));
 
-      await Task.Run(() => File.WriteAllText(windowSettingsFile, json));
+      await Task.Run(() => File.WriteAllText(WindowSettingsFile, json));
     }
 
     #endregion IWindowSettingsRepository Implementation
