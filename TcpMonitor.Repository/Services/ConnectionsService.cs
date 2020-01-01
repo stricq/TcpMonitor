@@ -44,7 +44,7 @@ namespace TcpMonitor.Repository.Services {
     public ConnectionsService(IMapper mapper) {
       this.mapper = mapper;
 
-      dnsCache = new ConcurrentDictionary<IPAddress, String>();
+      dnsCache = new ConcurrentDictionary<IPAddress, string>();
 
       localAddresses = Dns.GetHostAddresses(Dns.GetHostName());
     }
