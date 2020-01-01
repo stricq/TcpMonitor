@@ -57,7 +57,7 @@ namespace TcpMonitor.Repository.Services {
       ConcurrentBag<Connection> connections = new ConcurrentBag<Connection>();
 
       await tables.ForEachAsync(table => Task.Run(table).ContinueWith(task => {
-        if (task.IsCompleted && !task.IsFaulted) task.Result.ForEach(item => connections.Add(item));
+        if (task.IsCompletedSuccessfully) task.Result.ForEach(item => connections.Add(item));
       }));
 
       return mapper.Map<List<DomainConnection>>(connections);
