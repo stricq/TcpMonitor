@@ -14,5 +14,17 @@ pipeline {
         bat 'dotnet build --configuration Debug'
       }
     }
+    stage('Build Release') {
+      when { anyOf { branch 'master'; branch 'release' } }
+      steps {
+        bat 'dotnet clean --configuration Release'
+        bat 'dotnet build --configuration Release'
+      }
+    }
+    stage('Build Installer') {
+      steps {
+        bat 'dotnet build --configuration Release TcpMonitor.Installer/TcpMonitor.Installer.vdproj'
+      }
+    }
   }
 }
