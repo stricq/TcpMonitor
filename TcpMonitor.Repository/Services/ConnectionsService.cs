@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ using TcpMonitor.Repository.Models.IpService;
 namespace TcpMonitor.Repository.Services {
 
   [Export(typeof(IConnectionsService))]
+  [SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Assignment is requireed by the called dll.")]
   public class ConnectionsService : IConnectionsService {
 
     #region Private Fields
@@ -112,7 +114,7 @@ namespace TcpMonitor.Repository.Services {
 
       byte[] tcpTable = new byte[size];
 
-      IpHelperApi.GetExtendedTcpTable(tcpTable, out _, true, AfInet.AF_INET, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
+      IpHelperApi.GetExtendedTcpTable(tcpTable, out size, true, AfInet.AF_INET, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
       int index = 0;
 
@@ -151,7 +153,7 @@ namespace TcpMonitor.Repository.Services {
 
       byte[] tcpTable = new byte[size];
 
-      IpHelperApi.GetExtendedTcpTable(tcpTable, out _, true, AfInet.AF_INET6, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
+      IpHelperApi.GetExtendedTcpTable(tcpTable, out size, true, AfInet.AF_INET6, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
       int index = 0;
 
@@ -194,7 +196,7 @@ namespace TcpMonitor.Repository.Services {
 
       byte[] udpTable = new byte[size];
 
-      IpHelperApi.GetExtendedUdpTable(udpTable, out _, true, AfInet.AF_INET, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
+      IpHelperApi.GetExtendedUdpTable(udpTable, out size, true, AfInet.AF_INET, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
 
       int index = 0;
 
@@ -225,7 +227,7 @@ namespace TcpMonitor.Repository.Services {
 
       byte[] udpTable = new byte[size];
 
-      IpHelperApi.GetExtendedUdpTable(udpTable, out _, true, AfInet.AF_INET6, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
+      IpHelperApi.GetExtendedUdpTable(udpTable, out size, true, AfInet.AF_INET6, UdpTableClass.UDP_TABLE_OWNER_PID, 0);
 
       int index = 0;
 
