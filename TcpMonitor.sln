@@ -3,10 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Wpf", "TcpMonitor.Wpf\TcpMonitor.Wpf.csproj", "{E387D901-ED2B-4E21-ADC7-3D3CB899860A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpMonitor.Wpf", "TcpMonitor.Wpf\TcpMonitor.Wpf.csproj", "{E387D901-ED2B-4E21-ADC7-3D3CB899860A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00 Solution Items", "00 Solution Items", "{B55B0962-C6E8-4D82-896F-41118FCBF0CF}"
 	ProjectSection(SolutionItems) = preProject
+		Jenkinsfile.gy = Jenkinsfile.gy
 		README.md = README.md
 		TcpMonitor.sln.DotSettings = TcpMonitor.sln.DotSettings
 		TcpMonitor.sln.DotSettings.user = TcpMonitor.sln.DotSettings.user
@@ -18,13 +19,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "20 Domain", "20 Domain", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "30 Repository", "30 Repository", "{2A22484F-1472-4614-9D43-790BCE917DE6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Domain", "TcpMonitor.Domain\TcpMonitor.Domain.csproj", "{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpMonitor.Domain", "TcpMonitor.Domain\TcpMonitor.Domain.csproj", "{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository", "TcpMonitor.Repository\TcpMonitor.Repository.csproj", "{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpMonitor.Repository", "TcpMonitor.Repository\TcpMonitor.Repository.csproj", "{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository.IpService", "TcpMonitor.Repository.IpService\TcpMonitor.Repository.IpService.csproj", "{A794103F-F3E6-49E6-8035-AAA77E5E3D3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpMonitor.Repository.IpService", "TcpMonitor.Repository.IpService\TcpMonitor.Repository.IpService.csproj", "{A794103F-F3E6-49E6-8035-AAA77E5E3D3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpMonitor.Repository.Models", "TcpMonitor.Repository.Models\TcpMonitor.Repository.Models.csproj", "{78026A2B-2C24-4668-B61A-271C0720000B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpMonitor.Repository.Models", "TcpMonitor.Repository.Models\TcpMonitor.Repository.Models.csproj", "{78026A2B-2C24-4668-B61A-271C0720000B}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "TcpMonitor.Installer", "TcpMonitor.Installer\TcpMonitor.Installer.vdproj", "{3D99E54C-9B80-46EC-9FD4-C10E99D3540F}"
 EndProject

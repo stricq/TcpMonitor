@@ -1,0 +1,18 @@
+pipeline {
+  agent any
+  environment {
+    MASTER_VER  = '2.0.0'
+    RELEASE_VER = '2.0.0'
+
+    GIT_HASH = GIT_COMMIT.take(7)
+  }
+  stages {
+    stage ('Build Debug') {
+      when { not { anyOf { branch 'master'; branch 'release' } } }
+      steps {
+        bat 'dotnet clean --configuration Debug'
+        bat 'dotnet build --configuration Debug'
+      }
+    }
+  }
+}
