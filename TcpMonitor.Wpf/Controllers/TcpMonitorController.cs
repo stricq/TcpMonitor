@@ -7,6 +7,7 @@ using System.Windows.Threading;
 
 using AutoMapper;
 
+using Str.Common.Extensions;
 using Str.Common.Messages;
 
 using Str.MvvmCommon.Contracts;
@@ -64,7 +65,7 @@ namespace TcpMonitor.Wpf.Controllers {
     public int InitializePriority { get; } = 1000;
 
     public async Task InitializeAsync() {
-      viewModel.Settings = mapper.Map<WindowSettingsViewEntity>(await settingsRepository.LoadWindowSettingsAsync());
+      viewModel.Settings = mapper.Map<WindowSettingsViewEntity>(await settingsRepository.LoadWindowSettingsAsync().Fire());
 
       RegisterCommands();
     }
@@ -74,27 +75,29 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Commands
 
     private void RegisterCommands() {
-      viewModel.Initialized = new RelayCommand<EventArgs>(OnInitialized);
-      viewModel.Loaded      = new RelayCommand<RoutedEventArgs>(OnLoaded);
-      viewModel.Closing     = new RelayCommand<CancelEventArgs>(OnClosing);
+      viewModel.Initialized = new RelayCommandAsync<EventArgs>(OnInitializedAsync);
+      viewModel.Loaded      = new RelayCommandAsync<RoutedEventArgs>(OnLoadedAsync);
+      viewModel.Closing     = new RelayCommandAsync<CancelEventArgs>(OnClosingAsync);
     }
 
-    private void OnInitialized(EventArgs args) {
+    private Task OnInitializedAsync(EventArgs args) {
       isStartupComplete = true;
 
       messenger.Send(new ApplicationInitializedMessage());
+
+      return Task.CompletedTask;
     }
 
-    private void OnLoaded(RoutedEventArgs args) {
-      messenger.Send(new ApplicationLoadedMessage());
+    private async Task OnLoadedAsync(RoutedEventArgs args) {
+      await messenger.SendAsync(new ApplicationLoadedMessage()).Fire();
     }
 
-    private void OnClosing(CancelEventArgs args) {
+    private async Task OnClosingAsync(CancelEventArgs args) {
       ApplicationClosingMessage message = new ApplicationClosingMessage();
 
-      Task.Run(() => messenger.SendAsync(message)).Wait();
+      await messenger.SendAsync(message).Fire();
 
-      if (!message.Cancel && viewModel.Settings.AreSettingsChanged) Task.Run(SaveSettings).Wait();
+      if (!message.Cancel && viewModel.Settings.AreSettingsChanged) await SaveSettingsAsync().Fire();
 
       args.Cancel = message.Cancel;
     }
@@ -104,9 +107,7 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Private Methods
 
     private void OnDomainUnhandledException(object sender, UnhandledExceptionEventArgs e) {
-      Exception ex = e.ExceptionObject as Exception;
-
-      if (ex == null) return;
+      if (!(e.ExceptionObject is Exception ex)) return;
 
       if (e.IsTerminating) MessageBox.Show(ex.Message, "Fatal Domain Unhandled Exception");
       else messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Domain Unhandled Exception", Exception = ex });
@@ -146,8 +147,8 @@ namespace TcpMonitor.Wpf.Controllers {
       e.SetObserved();
     }
 
-    private async Task SaveSettings() {
-      await settingsRepository.SaveWindowSettingsAsync(mapper.Map<DomainWindowSettings>(viewModel.Settings));
+    private async Task SaveSettingsAsync() {
+      await settingsRepository.SaveWindowSettingsAsync(mapper.Map<DomainWindowSettings>(viewModel.Settings)).Fire();
     }
 
     #endregion Private Methods

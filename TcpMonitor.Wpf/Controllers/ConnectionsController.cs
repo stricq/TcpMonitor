@@ -85,7 +85,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
     public int InitializePriority { get; } = 100;
 
-    public async Task InitializeAsync() {
+    public Task InitializeAsync() {
       connectionsTimer.Tick    += OnConnectionsTimerTick;
       connectionsTimer.Interval = TimeSpan.FromMilliseconds(10);
 
@@ -103,7 +103,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
       RegisterMessages();
 
-      await Task.CompletedTask;
+      return Task.CompletedTask;
     }
 
     #endregion IController Implementation
@@ -203,7 +203,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
       Stopwatch watch = Stopwatch.StartNew();
 
-      List<DomainConnection> incoming = await connectionService.GetConnectionsAsync();
+      List<DomainConnection> incoming = await connectionService.GetConnectionsAsync().Fire();
 
       if (!viewModel.ViewPidZero) incoming.Where(c => c.Pid == 0).ToList().ForEach(c => incoming.Remove(c));
 

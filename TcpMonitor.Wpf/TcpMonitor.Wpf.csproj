@@ -8,28 +8,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Views\network-icon-21485.png" />
+    <None Remove="Images\network-icon-21485.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Images\network-icon-21485.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="STR.Common" Version="2.1.0" />
-    <PackageReference Include="STR.MvvmCommon" Version="2.1.0" />
+    <PackageReference Include="STR.MvvmCommon" Version="2.1.1-beta.20002.1519" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TcpMonitor.Domain\TcpMonitor.Domain.csproj" />
+    <ProjectReference Include="..\TcpMonitor.Repository.IpService\TcpMonitor.Repository.IpService.csproj" />
+    <ProjectReference Include="..\TcpMonitor.Repository.Models\TcpMonitor.Repository.Models.csproj" />
     <ProjectReference Include="..\TcpMonitor.Repository\TcpMonitor.Repository.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Views\network-icon-21485.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Images\network-icon-21485.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

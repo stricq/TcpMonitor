@@ -39,7 +39,7 @@ namespace TcpMonitor.Wpf {
     #region Overrides
 
     protected override void OnStartup(StartupEventArgs e) {
-      base.OnStartup(e);
+      TaskHelper.RunOnUiThread(() => { }).FireAndForget(); // Initialize the synchronization context.
 
       try {
         IEnumerable<IAutoMapperConfiguration> configurations = container.GetAll<IAutoMapperConfiguration>();
@@ -62,10 +62,12 @@ namespace TcpMonitor.Wpf {
 
         MessageBox.Show(ex.Message, "MEF Error");
       }
+
+      base.OnStartup(e);
     }
 
     #endregion Overrides
 
-  }
+    }
 
 }

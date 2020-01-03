@@ -18,11 +18,11 @@ namespace TcpMonitor.Wpf.ViewModels {
 
     #region PrivateFields
 
-    private RelayCommand<EventArgs> initialized;
+    private RelayCommandAsync<EventArgs> initialized;
 
-    private RelayCommand<RoutedEventArgs> loaded;
+    private RelayCommandAsync<RoutedEventArgs> loaded;
 
-    private RelayCommand<CancelEventArgs> closing;
+    private RelayCommandAsync<CancelEventArgs> closing;
 
     private WindowSettingsViewEntity settings;
 
@@ -30,17 +30,17 @@ namespace TcpMonitor.Wpf.ViewModels {
 
     #region Properties
 
-    public RelayCommand<EventArgs> Initialized {
+    public RelayCommandAsync<EventArgs> Initialized {
       get => initialized;
       set { SetField(ref initialized, value, () => Initialized); }
     }
 
-    public RelayCommand<RoutedEventArgs> Loaded {
+    public RelayCommandAsync<RoutedEventArgs> Loaded {
       get => loaded;
       set { SetField(ref loaded, value, () => Loaded); }
     }
 
-    public RelayCommand<CancelEventArgs> Closing {
+    public RelayCommandAsync<CancelEventArgs> Closing {
       get => closing;
       set { SetField(ref closing, value, () => Closing); }
     }
