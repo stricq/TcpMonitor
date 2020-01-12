@@ -16,8 +16,7 @@ using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
 
 using TcpMonitor.Repository.IpService;
-
-using TcpMonitor.Repository.Models.IpService;
+using TcpMonitor.Repository.Models;
 
 
 namespace TcpMonitor.Repository.Services {

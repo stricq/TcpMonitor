@@ -1,8 +1,11 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 
 
-namespace TcpMonitor.Repository.Models.IpService {
+namespace TcpMonitor.Repository.Models {
 
+  [SuppressMessage("ReSharper", "UnusedMember.Global", Justification = "Used by Automapper.")]
+  [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global", Justification = "Used by Automapper.")]
   public class Connection {
 
     public int Pid { get; set; }

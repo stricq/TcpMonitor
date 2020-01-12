@@ -15,7 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\TcpMonitor.Domain\TcpMonitor.Domain.csproj" />
     <ProjectReference Include="..\TcpMonitor.Repository.IpService\TcpMonitor.Repository.IpService.csproj" />
-    <ProjectReference Include="..\TcpMonitor.Repository.Models\TcpMonitor.Repository.Models.csproj" />
   </ItemGroup>
 
 </Project>
