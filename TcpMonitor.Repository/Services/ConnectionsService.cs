@@ -57,8 +57,8 @@ namespace TcpMonitor.Repository.Services {
       ConcurrentBag<Connection> connections = new ConcurrentBag<Connection>();
 
       await tables.ForEachAsync(table => Task.Run(table).ContinueWith(task => {
-        if (task.IsCompletedSuccessfully) task.Result.ForEach(item => connections.Add(item));
-      }));
+        if (task.IsCompletedSuccessfully) task.FireAndWait().ForEach(item => connections.Add(item));
+      })).Fire();
 
       return mapper.Map<List<DomainConnection>>(connections);
     }
@@ -83,7 +83,7 @@ namespace TcpMonitor.Repository.Services {
 
           return addr;
         }
-      });
+      }).Fire();
     }
 
     public bool IsLocalAddress(IPEndPoint hostAddress) {
@@ -102,7 +102,7 @@ namespace TcpMonitor.Repository.Services {
         catch {
           return "Unknown";
         }
-      });
+      }).Fire();
     }
 
     #endregion IConnectionsService Implementation

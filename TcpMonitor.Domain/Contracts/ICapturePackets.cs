@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using TcpMonitor.Domain.Models;
 
@@ -7,7 +8,7 @@ namespace TcpMonitor.Domain.Contracts {
 
   public interface ICapturePackets {
 
-    void RegisterPacketCapture(Action<DomainPacket> callback);
+    Task RegisterPacketCaptureAsync(Action<DomainPacket> packetCallback, Action<DomainDeviceError> deviceCallback);
 
     void UnregisterPacketCapture();
 

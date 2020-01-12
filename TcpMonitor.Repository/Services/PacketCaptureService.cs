@@ -2,11 +2,11 @@
 using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-
+using System.Threading.Tasks;
 using PacketDotNet;
 
 using SharpPcap;
-
+using Str.Common.Extensions;
 using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
 
@@ -20,7 +20,7 @@ namespace TcpMonitor.Repository.Services {
 
     private bool initialized;
 
-    private Action<DomainPacket> callbackAction;
+    private Action<DomainPacket> callback;
 
     private CaptureDeviceList devices;
 
@@ -28,19 +28,26 @@ namespace TcpMonitor.Repository.Services {
 
     #region ICapturePackets Implementation
 
-    [SuppressMessage("ReSharper", "EmptyGeneralCatchClause")]
-    public void RegisterPacketCapture(Action<DomainPacket> callback) {
-      callbackAction = callback;
+    public async Task RegisterPacketCaptureAsync(Action<DomainPacket> packetCallback, Action<DomainDeviceError> deviceCallback) {
+      callback = packetCallback;
+
+      DomainDeviceError deviceMessage = new DomainDeviceError();
 
       try {
         devices = CaptureDeviceList.Instance;
       }
-      catch {
-        return; // Most likely reason is WinPCAP is not installed
+      catch { // Most likely reason is WinPCAP is not installed
+        deviceMessage.NoDevicesError = true;
+
+        deviceCallback(deviceMessage);
+
+        return;
       }
 
-      foreach(ICaptureDevice device in devices) {
+      await devices.ForEachAsync(device => {
         try {
+          deviceMessage.DeviceName = device.Description;
+
           device.OnPacketArrival += OnDevicePacketArrival;
 
           device.Open(DeviceMode.Normal, 1000);
@@ -49,10 +56,18 @@ namespace TcpMonitor.Repository.Services {
 
           device.StartCapture();
 
+          deviceMessage.DeviceLoaded = true;
+
           initialized = true;
         }
-        catch { } // Ignore device errors
-      }
+        catch {
+          deviceMessage.DeviceLoaded = false;
+        }
+
+        deviceCallback(deviceMessage);
+
+        return Task.CompletedTask;
+      }).Fire();
     }
 
     [SuppressMessage("ReSharper", "EmptyGeneralCatchClause")]
@@ -116,7 +131,7 @@ namespace TcpMonitor.Repository.Services {
         return;
       }
 
-      callbackAction(domainPacket);
+      callback(domainPacket);
     }
 
     #endregion Private Methods

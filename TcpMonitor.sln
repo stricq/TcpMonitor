@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00 Solution Items", "00 Sol
 		Jenkinsfile.gy = Jenkinsfile.gy
 		README.md = README.md
 		TcpMonitor.sln.DotSettings = TcpMonitor.sln.DotSettings
-		TcpMonitor.sln.DotSettings.user = TcpMonitor.sln.DotSettings.user
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10 Presentation", "10 Presentation", "{CEFA0970-21ED-4802-BC1E-270CD8B2095B}"

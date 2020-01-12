@@ -111,13 +111,13 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Messages
 
     private void RegisterMessages() {
-      messenger.Register<ApplicationLoadedMessage>(this, OnApplicationLoaded);
+      messenger.Register<ApplicationLoadedMessage>(this, OnApplicationLoadedAsync);
 
       messenger.Register<ApplicationClosingMessage>(this, OnApplicationClosing);
     }
 
-    private void OnApplicationLoaded(ApplicationLoadedMessage message) {
-      capturePackets.RegisterPacketCapture(OnPacketCaptured);
+    private async Task OnApplicationLoadedAsync(ApplicationLoadedMessage message) {
+      await capturePackets.RegisterPacketCaptureAsync(OnPacketCaptured, OnDeviceMessage).Fire();
     }
 
     private void OnApplicationClosing(ApplicationClosingMessage message) {
@@ -198,6 +198,10 @@ namespace TcpMonitor.Wpf.Controllers {
       }
     }
 
+    private void OnDeviceMessage(DomainDeviceError deviceMessage) {
+
+    }
+
     private async void OnConnectionsTimerTick(object sender, EventArgs args) {
       connectionsTimer.Stop();
 
@@ -261,7 +265,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
       lock(entityLock) closed.ForEach(c => viewModel.Connections.Remove(c));
 
-      var mods = (from row1 in connections
+      var mods = (from row1 in connections.ToList()
                   join row2 in viewModel.Connections on row1.Key equals row2.Key
                 select new { Mod = row1, Match = row2 }).ToList();
 
@@ -275,7 +279,7 @@ namespace TcpMonitor.Wpf.Controllers {
         }
       });
 
-      List<DomainConnection> adds = (from row1 in connections
+      List<DomainConnection> adds = (from row1 in connections.ToList()
                                      join row2 in viewModel.Connections on row1.Key equals row2.Key into collGroup
                                      from sub  in collGroup.DefaultIfEmpty()
                                     where sub == null
@@ -288,7 +292,7 @@ namespace TcpMonitor.Wpf.Controllers {
       lock(entityLock) viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
 
       List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
-                                         join row2 in connections on row1.Key equals row2.Key into collGroup
+                                         join row2 in connections.ToList() on row1.Key equals row2.Key into collGroup
                                          from sub  in collGroup.DefaultIfEmpty()
                                         where sub == null
                                            && !row1.IsClosed
