@@ -189,7 +189,7 @@ namespace TcpMonitor.Wpf.Controllers {
                 connection.RemoteEndPoint = packet.SourceEndPoint;
               }
 
-              connection.ResolveHostNames(connectionService).FireAndForget();
+              connection.ResolveHostNamesAsync(connectionService).FireAndForget();
 
               packets.Add(connection);
             }
@@ -231,7 +231,7 @@ namespace TcpMonitor.Wpf.Controllers {
                                     where sub == null
                                    select row1).ToList();
 
-      adds.ForEach(add => add.ResolveHostNames(connectionService).FireAndForget());
+      adds.ForEach(add => add.ResolveHostNamesAsync(connectionService).FireAndForget());
 
       connections.AddRange(adds);
 

@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="STR.Common" Version="2.1.0" />
   </ItemGroup>
 
 </Project>

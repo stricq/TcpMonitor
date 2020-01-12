@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading.Tasks;
+
+using Str.Common.Extensions;
 
 using TcpMonitor.Domain.Contracts;
 
 
 namespace TcpMonitor.Domain.Models {
 
+  [SuppressMessage("ReSharper", "ClassNeverInstantiated.Global",  Justification = "Instantiated by Automapper.")]
   public class DomainConnection {
 
     #region Properties
@@ -33,12 +37,12 @@ namespace TcpMonitor.Domain.Models {
 
     #region Domain Methods
 
-    public async Task ResolveHostNames(IConnectionsService connectionsService) {
-      ProcessName = await connectionsService.GetProcessNameAsync(Pid);
+    public async Task ResolveHostNamesAsync(IConnectionsService connectionsService) {
+      ProcessName = await connectionsService.GetProcessNameAsync(Pid).Fire();
 
-      LocalHostName = await connectionsService.GetHostNameAsync(LocalEndPoint);
+      LocalHostName = await connectionsService.GetHostNameAsync(LocalEndPoint).Fire();
 
-      RemoteHostName = await connectionsService.GetHostNameAsync(RemoteEndPoint);
+      RemoteHostName = await connectionsService.GetHostNameAsync(RemoteEndPoint).Fire();
     }
 
     #endregion Domain Methods
