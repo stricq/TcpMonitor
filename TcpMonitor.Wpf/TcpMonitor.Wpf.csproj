@@ -19,8 +19,9 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
-    <PackageReference Include="STR.Common" Version="2.1.0" />
-    <PackageReference Include="STR.MvvmCommon" Version="2.1.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="STR.Common" Version="3.0.0" />
+    <PackageReference Include="STR.MvvmCommon" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

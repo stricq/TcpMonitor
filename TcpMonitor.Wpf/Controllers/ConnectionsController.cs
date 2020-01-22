@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -25,7 +24,6 @@ using TcpMonitor.Wpf.ViewModels;
 
 namespace TcpMonitor.Wpf.Controllers {
 
-  [Export(typeof(IController))]
   public sealed class ConnectionsController : IController {
 
     #region Private Fields
@@ -33,8 +31,8 @@ namespace TcpMonitor.Wpf.Controllers {
     private readonly TimeSpan highlightLagTime = TimeSpan.FromSeconds(1);
     private readonly TimeSpan    closedLagTime = TimeSpan.FromSeconds(1);
 
-    private readonly Object entityLock = new Object();
-    private readonly Object packetLock = new Object();
+    private readonly object entityLock = new object();
+    private readonly object packetLock = new object();
 
     private readonly List<DomainConnection> connections;
     private readonly List<DomainConnection> packets;
@@ -57,7 +55,6 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Constructor
 
-    [ImportingConstructor]
     public ConnectionsController(ConnectionsViewModel viewModel, IMapper mapper, IMessenger messenger, IConnectionsService connectionService, ICapturePackets capturePackets) {
       this.viewModel = viewModel;
 
@@ -116,8 +113,10 @@ namespace TcpMonitor.Wpf.Controllers {
       messenger.Register<ApplicationClosingMessage>(this, OnApplicationClosing);
     }
 
-    private async Task OnApplicationLoadedAsync(ApplicationLoadedMessage message) {
-      await capturePackets.RegisterPacketCaptureAsync(OnPacketCaptured, OnDeviceMessage).Fire();
+    private Task OnApplicationLoadedAsync(ApplicationLoadedMessage message) {
+      Task.Run(() => capturePackets.RegisterPacketCaptureAsync(OnPacketCaptured, OnDeviceMessage)).FireAndForget();
+
+      return Task.CompletedTask;
     }
 
     private void OnApplicationClosing(ApplicationClosingMessage message) {

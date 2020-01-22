@@ -9,7 +9,7 @@
         mvvm:FrameworkElementBehaviors.InitializedCommand="{Binding Path=Initialized}"
         mvvm:FrameworkElementBehaviors.LoadedCommand="{Binding Path=Loaded}"
         mvvm:WindowBehaviors.ClosingCommand="{Binding Path=Closing}"
-        mvvm:ViewModelLocator.ComposedViewModel="TcpMonitorViewModel"
+        mvvm:ViewModelLocator.ViewModel="vm:TcpMonitorViewModel"
         Icon="/Images/network-icon-21485.png"
         Title="TCP Monitor - STR Programming Services"
         WindowStartupLocation="Manual" ResizeMode="CanResizeWithGrip" MinWidth="800" MinHeight="600"

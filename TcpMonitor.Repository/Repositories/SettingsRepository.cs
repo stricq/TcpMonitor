@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -13,7 +12,6 @@ using TcpMonitor.Domain.Models;
 
 namespace TcpMonitor.Repository.Repositories {
 
-  [Export(typeof(IWindowSettingsRepository))]
   public class SettingsRepository : IWindowSettingsRepository {
 
     #region Private Fields

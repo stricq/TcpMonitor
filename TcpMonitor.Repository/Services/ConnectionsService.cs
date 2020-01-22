@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -21,7 +20,6 @@ using TcpMonitor.Repository.Models;
 
 namespace TcpMonitor.Repository.Services {
 
-  [Export(typeof(IConnectionsService))]
   [SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Assignment is requireed by the called dll.")]
   public class ConnectionsService : IConnectionsService {
 
@@ -39,7 +37,6 @@ namespace TcpMonitor.Repository.Services {
 
     #region Constructor
 
-    [ImportingConstructor]
     public ConnectionsService(IMapper mapper) {
       this.mapper = mapper;
 

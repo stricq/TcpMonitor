@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -22,7 +21,6 @@ using TcpMonitor.Wpf.ViewModels;
 
 namespace TcpMonitor.Wpf.Controllers {
 
-  [Export(typeof(IController))]
   public class TcpMonitorController : IController {
 
     #region Private Fields
@@ -40,7 +38,6 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Constructor
 
-    [ImportingConstructor]
     public TcpMonitorController(TcpMonitorViewModel viewModel, IMessenger messenger, IMapper mapper, IWindowSettingsRepository settingsRepository) {
       if (Application.Current != null) Application.Current.DispatcherUnhandledException += OnCurrentDispatcherUnhandledException;
 

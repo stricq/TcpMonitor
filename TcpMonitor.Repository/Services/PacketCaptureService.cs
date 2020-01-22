@@ -1,19 +1,20 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading.Tasks;
+
 using PacketDotNet;
 
 using SharpPcap;
+
 using Str.Common.Extensions;
+
 using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
 
 
 namespace TcpMonitor.Repository.Services {
 
-  [Export(typeof(ICapturePackets))]
   public sealed class PacketCaptureService : ICapturePackets {
 
     #region Private Fields
