@@ -5,7 +5,7 @@ using AutoMapper;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using Str.DialogView.Extensions;
 using Str.MvvmCommon.Contracts;
 using Str.MvvmCommon.Core;
 
@@ -72,6 +72,8 @@ namespace TcpMonitor.Wpf {
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration) {
       services.AddAutoMapper(typeof(ViewEntityMappingConfiguration), typeof(DomainModelMappingConfiguration));
+
+      services.AddStrDialogView();
 
       services.AddSingleton<TcpMonitorView>();
 

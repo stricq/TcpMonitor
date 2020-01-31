@@ -31,8 +31,9 @@ namespace TcpMonitor.Wpf.Controllers {
     private readonly TimeSpan highlightLagTime = TimeSpan.FromSeconds(1);
     private readonly TimeSpan    closedLagTime = TimeSpan.FromSeconds(1);
 
-    private readonly object entityLock = new object();
-    private readonly object packetLock = new object();
+    private readonly object     entityLock = new object();
+    private readonly object     packetLock = new object();
+    private readonly object connectionLock = new object();
 
     private readonly List<DomainConnection> connections;
     private readonly List<DomainConnection> packets;
@@ -222,7 +223,7 @@ namespace TcpMonitor.Wpf.Controllers {
                   join row2 in connections on row1.Key equals row2.Key
                 select new { Mod = row1, Match = row2 }).ToList();
 
-      mods.ForEach(set => mapper.Map(set.Mod, set.Match));
+      lock(connectionLock) mods.ForEach(set => mapper.Map(set.Mod, set.Match));
 
       List<DomainConnection> adds = (from row1 in incoming
                                      join row2 in connections on row1.Key equals row2.Key into collGroup
@@ -252,6 +253,10 @@ namespace TcpMonitor.Wpf.Controllers {
 
       Stopwatch watch = Stopwatch.StartNew();
 
+      List<DomainConnection> connectionsList;
+
+      lock(connectionLock) connectionsList = connections.ToList();
+
       DateTime now = DateTime.Now;
 
       viewModel.Connections.Where(c => now - c.LastChange > highlightLagTime).ForEach(c => {
@@ -264,7 +269,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
       lock(entityLock) closed.ForEach(c => viewModel.Connections.Remove(c));
 
-      var mods = (from row1 in connections.ToList()
+      var mods = (from row1 in connectionsList
                   join row2 in viewModel.Connections on row1.Key equals row2.Key
                 select new { Mod = row1, Match = row2 }).ToList();
 
@@ -278,7 +283,7 @@ namespace TcpMonitor.Wpf.Controllers {
         }
       });
 
-      List<DomainConnection> adds = (from row1 in connections.ToList()
+      List<DomainConnection> adds = (from row1 in connectionsList
                                      join row2 in viewModel.Connections on row1.Key equals row2.Key into collGroup
                                      from sub  in collGroup.DefaultIfEmpty()
                                     where sub == null
@@ -291,7 +296,7 @@ namespace TcpMonitor.Wpf.Controllers {
       lock(entityLock) viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
 
       List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
-                                         join row2 in connections.ToList() on row1.Key equals row2.Key into collGroup
+                                         join row2 in connectionsList on row1.Key equals row2.Key into collGroup
                                          from sub  in collGroup.DefaultIfEmpty()
                                         where sub == null
                                            && !row1.IsClosed

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using AutoMapper;
@@ -274,6 +275,7 @@ namespace TcpMonitor.Repository.Services {
       };
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static uint ConvertPort(uint port) {
       return ((port & 0xff) << 8) | (port >> 8);
     }
