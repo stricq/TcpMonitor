@@ -1,5 +1,6 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+
+using Str.Common.Core;
 
 using Str.MvvmCommon.Core;
 
@@ -33,7 +34,7 @@ namespace TcpMonitor.Wpf.ViewModels {
 
     private string connectionFilter;
 
-    private ObservableCollection<ConnectionViewEntity> connections;
+    private LockingObservableCollection<ConnectionViewEntity> connections;
 
     #endregion Private Fields
 
@@ -64,7 +65,7 @@ namespace TcpMonitor.Wpf.ViewModels {
       set { SetField(ref viewDropped, value, () => ViewDropped); }
     }
 
-    public ObservableCollection<ConnectionViewEntity> Connections {
+    public LockingObservableCollection<ConnectionViewEntity> Connections {
       get => connections;
       set { SetField(ref connections, value, () => Connections); }
     }

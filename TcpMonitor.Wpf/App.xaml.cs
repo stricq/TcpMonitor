@@ -5,7 +5,9 @@ using AutoMapper;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using Str.DialogView.Extensions;
+
 using Str.MvvmCommon.Contracts;
 using Str.MvvmCommon.Core;
 

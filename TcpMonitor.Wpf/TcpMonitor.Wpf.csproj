@@ -20,8 +20,8 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="STR.Common" Version="3.0.0" />
-    <PackageReference Include="STR.DialogView" Version="3.0.0" />
+    <PackageReference Include="STR.Common" Version="3.0.2" />
+    <PackageReference Include="STR.DialogView" Version="3.0.1-resources.200551846" />
     <PackageReference Include="STR.MvvmCommon" Version="3.0.0" />
   </ItemGroup>
 

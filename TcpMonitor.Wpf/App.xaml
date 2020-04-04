@@ -5,6 +5,8 @@
   <Application.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Str.DialogView;component/Themes/Generic.xaml" />
+
         <ResourceDictionary Source="Resources/ColorsAndGradients.xaml" />
 
         <ResourceDictionary Source="Resources/ButtonStyle.xaml" />

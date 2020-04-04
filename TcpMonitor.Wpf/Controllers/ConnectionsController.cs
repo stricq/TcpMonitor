@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,6 +8,7 @@ using System.Windows.Threading;
 
 using AutoMapper;
 
+using Str.Common.Core;
 using Str.Common.Extensions;
 using Str.Common.Messages;
 
@@ -31,12 +31,8 @@ namespace TcpMonitor.Wpf.Controllers {
     private readonly TimeSpan highlightLagTime = TimeSpan.FromSeconds(1);
     private readonly TimeSpan    closedLagTime = TimeSpan.FromSeconds(1);
 
-    private readonly object     entityLock = new object();
-    private readonly object     packetLock = new object();
-    private readonly object connectionLock = new object();
-
-    private readonly List<DomainConnection> connections;
-    private readonly List<DomainConnection> packets;
+    private readonly LockingList<DomainConnection> connections;
+    private readonly LockingList<DomainConnection> packets;
 
     private readonly DispatcherTimer connectionsTimer;
     private readonly DispatcherTimer     displayTimer;
@@ -59,7 +55,7 @@ namespace TcpMonitor.Wpf.Controllers {
     public ConnectionsController(ConnectionsViewModel viewModel, IMapper mapper, IMessenger messenger, IConnectionsService connectionService, ICapturePackets capturePackets) {
       this.viewModel = viewModel;
 
-      this.viewModel.Connections = new ObservableCollection<ConnectionViewEntity>();
+      this.viewModel.Connections = new LockingObservableCollection<ConnectionViewEntity>();
 
       this.mapper    = mapper;
       this.messenger = messenger;
@@ -67,8 +63,8 @@ namespace TcpMonitor.Wpf.Controllers {
       this.connectionService = connectionService;
       this.capturePackets    = capturePackets;
 
-      connections = new List<DomainConnection>();
-      packets     = new List<DomainConnection>();
+      connections = new LockingList<DomainConnection>();
+      packets     = new LockingList<DomainConnection>();
 
       connectionsTimer = new DispatcherTimer();
           displayTimer = new DispatcherTimer();
@@ -129,9 +125,7 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Private Methods
 
     private void OnPacketCaptured(DomainPacket packet) {
-      List<ConnectionViewEntity> locals;
-
-      lock(entityLock) locals = viewModel.Connections.Where(c => c.Key == packet.Key1).ToList();
+      List<ConnectionViewEntity> locals = viewModel.Connections.Where(c => c.Key == packet.Key1).ToList();
 
       locals.ForEach(local => {
         local.PacketsSent = (local.PacketsSent ?? 0) + 1;
@@ -144,9 +138,7 @@ namespace TcpMonitor.Wpf.Controllers {
         local.LastChange = DateTime.Now;
       });
 
-      List<ConnectionViewEntity> remotes;
-
-      lock(entityLock) remotes = viewModel.Connections.Where(c => c.Key == packet.Key2).ToList();
+      List<ConnectionViewEntity> remotes = viewModel.Connections.Where(c => c.Key == packet.Key2).ToList();
 
       remotes.ForEach(remote => {
         remote.PacketsReceived = (remote.PacketsReceived ?? 0) + 1;
@@ -164,36 +156,32 @@ namespace TcpMonitor.Wpf.Controllers {
 
         if (!viewModel.ViewDropped) return;
 
-        bool exists;
+        bool exists = packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key);
 
-        lock(packetLock) exists = packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key);
+        if (exists) return;
 
-        if (!exists) {
-          lock(packetLock) {
-            if (!packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key)) {
-              bool isSourceLocal      = connectionService.IsLocalAddress(packet.SourceEndPoint);
-              bool isDestinationLocal = connectionService.IsLocalAddress(packet.DestinationEndPoint);
+        if (!packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key)) {
+          bool isSourceLocal      = connectionService.IsLocalAddress(packet.SourceEndPoint);
+          bool isDestinationLocal = connectionService.IsLocalAddress(packet.DestinationEndPoint);
 
-              DomainConnection connection = mapper.Map<DomainConnection>(packet);
+          DomainConnection connection = mapper.Map<DomainConnection>(packet);
 
-              if ((isSourceLocal && isDestinationLocal) || isSourceLocal) {
-                connection.Key = packet.Key1;
+          if ((isSourceLocal && isDestinationLocal) || isSourceLocal) {
+            connection.Key = packet.Key1;
 
-                connection.LocalEndPoint  = packet.SourceEndPoint;
-                connection.RemoteEndPoint = packet.DestinationEndPoint;
-              }
-              else {
-                connection.Key = packet.Key2;
-
-                connection.LocalEndPoint  = packet.DestinationEndPoint;
-                connection.RemoteEndPoint = packet.SourceEndPoint;
-              }
-
-              connection.ResolveHostNamesAsync(connectionService).FireAndForget();
-
-              packets.Add(connection);
-            }
+            connection.LocalEndPoint  = packet.SourceEndPoint;
+            connection.RemoteEndPoint = packet.DestinationEndPoint;
           }
+          else {
+            connection.Key = packet.Key2;
+
+            connection.LocalEndPoint  = packet.DestinationEndPoint;
+            connection.RemoteEndPoint = packet.SourceEndPoint;
+          }
+
+          connection.ResolveHostNamesAsync(connectionService).FireAndForget();
+
+          packets.Add(connection);
         }
       }
     }
@@ -212,18 +200,16 @@ namespace TcpMonitor.Wpf.Controllers {
       if (!viewModel.ViewPidZero) incoming.Where(c => c.Pid == 0).ToList().ForEach(c => incoming.Remove(c));
 
       if (viewModel.ViewDropped) {
-        lock(packetLock) {
-          packets.Where(p => p.Pid != -1).ToList().ForEach(p => { packets.Remove(p); });
+        packets.Where(p => p.Pid != -1).ToList().ForEach(p => { packets.Remove(p); });
 
-          incoming.AddRange(packets);
-        }
+        incoming.AddRange(packets);
       }
 
       var mods = (from row1 in incoming
                   join row2 in connections on row1.Key equals row2.Key
                 select new { Mod = row1, Match = row2 }).ToList();
 
-      lock(connectionLock) mods.ForEach(set => mapper.Map(set.Mod, set.Match));
+      mods.ForEach(set => mapper.Map(set.Mod, set.Match));
 
       List<DomainConnection> adds = (from row1 in incoming
                                      join row2 in connections on row1.Key equals row2.Key into collGroup
@@ -253,10 +239,6 @@ namespace TcpMonitor.Wpf.Controllers {
 
       Stopwatch watch = Stopwatch.StartNew();
 
-      List<DomainConnection> connectionsList;
-
-      lock(connectionLock) connectionsList = connections.ToList();
-
       DateTime now = DateTime.Now;
 
       viewModel.Connections.Where(c => now - c.LastChange > highlightLagTime).ForEach(c => {
@@ -267,9 +249,9 @@ namespace TcpMonitor.Wpf.Controllers {
 
       List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => now - c.LastChange > closedLagTime && c.IsClosed).ToList();
 
-      lock(entityLock) closed.ForEach(c => viewModel.Connections.Remove(c));
+      closed.ForEach(c => viewModel.Connections.Remove(c));
 
-      var mods = (from row1 in connectionsList
+      var mods = (from row1 in connections
                   join row2 in viewModel.Connections on row1.Key equals row2.Key
                 select new { Mod = row1, Match = row2 }).ToList();
 
@@ -283,7 +265,7 @@ namespace TcpMonitor.Wpf.Controllers {
         }
       });
 
-      List<DomainConnection> adds = (from row1 in connectionsList
+      List<DomainConnection> adds = (from row1 in connections
                                      join row2 in viewModel.Connections on row1.Key equals row2.Key into collGroup
                                      from sub  in collGroup.DefaultIfEmpty()
                                     where sub == null
@@ -293,10 +275,10 @@ namespace TcpMonitor.Wpf.Controllers {
 
       added.ForEach(add => add.IsNew = true);
 
-      lock(entityLock) viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
+      viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
 
       List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
-                                         join row2 in connectionsList on row1.Key equals row2.Key into collGroup
+                                         join row2 in connections on row1.Key equals row2.Key into collGroup
                                          from sub  in collGroup.DefaultIfEmpty()
                                         where sub == null
                                            && !row1.IsClosed
@@ -304,7 +286,7 @@ namespace TcpMonitor.Wpf.Controllers {
 
       dels.ForEach(del => { del.IsClosed = true; del.LastChange = DateTime.Now; });
 
-      lock(entityLock) viewModel.Connections.Sort(comparer);
+      viewModel.Connections.Sort(comparer);
 
       if (viewModel.IsFiltered && !String.IsNullOrEmpty(viewModel.ConnectionFilter)) {
         try {
