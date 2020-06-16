@@ -115,7 +115,7 @@ namespace TcpMonitor.Repository.Services {
 
       int index = 0;
 
-      int entries = BitConverter.ToInt32(tcpTable, index); index += 4;
+      int entries = BitConverter.ToInt32(tcpTable, index); index = 4;
 
       List<Connection> table = new List<Connection>(entries);
 
@@ -154,7 +154,7 @@ namespace TcpMonitor.Repository.Services {
 
       int index = 0;
 
-      int entries = BitConverter.ToInt32(tcpTable, index); index += 4;
+      int entries = BitConverter.ToInt32(tcpTable, index); index = 4;
 
       List<Connection> table = new List<Connection>(entries);
 
@@ -197,7 +197,7 @@ namespace TcpMonitor.Repository.Services {
 
       int index = 0;
 
-      int entries = BitConverter.ToInt32(udpTable, index); index += 4;
+      int entries = BitConverter.ToInt32(udpTable, index); index = 4;
 
       List<Connection> table = new List<Connection>(entries);
 
@@ -228,7 +228,7 @@ namespace TcpMonitor.Repository.Services {
 
       int index = 0;
 
-      int entries = BitConverter.ToInt32(udpTable, index); index += 4;
+      int entries = BitConverter.ToInt32(udpTable, index); index = 4;
 
       List<Connection> table = new List<Connection>(entries);
 
