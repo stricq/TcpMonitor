@@ -22,11 +22,14 @@ using TcpMonitor.Wpf.ViewEntities;
 using TcpMonitor.Wpf.ViewModels;
 
 
-namespace TcpMonitor.Wpf.Controllers {
+namespace TcpMonitor.Wpf.Controllers;
 
-  public sealed class ConnectionsController : IController {
+
+public sealed class ConnectionsController : IController, IMessageReceiver {
 
     #region Private Fields
+
+    private bool shutdown;
 
     private readonly TimeSpan highlightLagTime = TimeSpan.FromSeconds(1);
     private readonly TimeSpan    closedLagTime = TimeSpan.FromSeconds(1);
@@ -53,51 +56,51 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Constructor
 
     public ConnectionsController(ConnectionsViewModel viewModel, IMapper mapper, IMessenger messenger, IConnectionsService connectionService, ICapturePackets capturePackets) {
-      this.viewModel = viewModel;
+        this.viewModel = viewModel;
 
-      this.viewModel.Connections = new LockingObservableCollection<ConnectionViewEntity>();
+        this.viewModel.Connections = new LockingObservableCollection<ConnectionViewEntity>();
 
-      this.mapper    = mapper;
-      this.messenger = messenger;
+        this.mapper    = mapper;
+        this.messenger = messenger;
 
-      this.connectionService = connectionService;
-      this.capturePackets    = capturePackets;
+        this.connectionService = connectionService;
+        this.capturePackets    = capturePackets;
 
-      connections = new LockingList<DomainConnection>();
-      packets     = new LockingList<DomainConnection>();
+        connections = [];
+        packets     = [];
 
-      connectionsTimer = new DispatcherTimer();
-          displayTimer = new DispatcherTimer();
-           memoryTimer = new DispatcherTimer();
+        connectionsTimer = new DispatcherTimer();
+            displayTimer = new DispatcherTimer();
+             memoryTimer = new DispatcherTimer();
 
-      comparer = new ConnectionViewEntityComparer();
+        comparer = new ConnectionViewEntityComparer();
     }
 
     #endregion Constructor
 
     #region IController Implementation
 
-    public int InitializePriority { get; } = 100;
+    public int InitializePriority => 100;
 
     public Task InitializeAsync() {
-      connectionsTimer.Tick    += OnConnectionsTimerTick;
-      connectionsTimer.Interval = TimeSpan.FromMilliseconds(10);
+        connectionsTimer.Tick    += OnConnectionsTimerTick;
+        connectionsTimer.Interval = TimeSpan.FromMilliseconds(10);
 
-      connectionsTimer.Start();
+        connectionsTimer.Start();
 
-      displayTimer.Tick    += OnDisplayTimerTick;
-      displayTimer.Interval = TimeSpan.FromMilliseconds(10);
+        displayTimer.Tick    += OnDisplayTimerTick;
+        displayTimer.Interval = TimeSpan.FromMilliseconds(10);
 
-      displayTimer.Start();
+        displayTimer.Start();
 
-      memoryTimer.Tick    += OnMemoryTimerTick;
-      memoryTimer.Interval = TimeSpan.FromSeconds(1);
+        memoryTimer.Tick    += OnMemoryTimerTick;
+        memoryTimer.Interval = TimeSpan.FromSeconds(1);
 
-      memoryTimer.Start();
+        memoryTimer.Start();
 
-      RegisterMessages();
+        RegisterMessages();
 
-      return Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     #endregion IController Implementation
@@ -105,19 +108,27 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Messages
 
     private void RegisterMessages() {
-      messenger.Register<ApplicationLoadedMessage>(this, OnApplicationLoadedAsync);
+        messenger.Register<ApplicationLoadedMessage>(this, OnApplicationLoadedAsync);
 
-      messenger.Register<ApplicationClosingMessage>(this, OnApplicationClosing);
+        messenger.Register<ApplicationClosingMessage>(this, OnApplicationClosingAsync);
     }
 
     private Task OnApplicationLoadedAsync(ApplicationLoadedMessage message) {
-      Task.Run(() => capturePackets.RegisterPacketCaptureAsync(OnPacketCaptured, OnDeviceMessage)).FireAndForget();
+        Task.Run(() => capturePackets.RegisterPacketCaptureAsync(OnPacketCaptured, OnDeviceMessage)).FireAndForget();
 
-      return Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    private void OnApplicationClosing(ApplicationClosingMessage message) {
-      capturePackets.UnregisterPacketCapture();
+    private async Task OnApplicationClosingAsync(ApplicationClosingMessage message) {
+        shutdown = true;
+
+        memoryTimer.Stop();
+
+        Task delay = Task.Delay(15);
+
+        capturePackets.UnregisterPacketCapture();
+
+        await delay.Fire();
     }
 
     #endregion Messages
@@ -125,33 +136,34 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Private Methods
 
     private void OnPacketCaptured(DomainPacket packet) {
-      List<ConnectionViewEntity> locals = viewModel.Connections.Where(c => c.Key == packet.Key1).ToList();
+        List<ConnectionViewEntity> locals = viewModel.Connections.Where(c => c.Key == packet.Key1).ToList();
 
-      locals.ForEach(local => {
-        local.PacketsSent = (local.PacketsSent ?? 0) + 1;
-        local.BytesSent   = (local.BytesSent   ?? 0) + packet.Bytes;
+        locals.ForEach(local => {
+            local.PacketsSent = (local.PacketsSent ?? 0) + 1;
+            local.BytesSent   = (local.BytesSent   ?? 0) + packet.Bytes;
 
-        local.HasData  = true;
-        local.IsNew    = false;
-        local.IsClosed = false;
+            local.HasData  = true;
+            local.IsNew    = false;
+            local.IsClosed = false;
 
-        local.LastChange = DateTime.Now;
-      });
+            local.LastChange = DateTime.Now;
+        });
 
-      List<ConnectionViewEntity> remotes = viewModel.Connections.Where(c => c.Key == packet.Key2).ToList();
+        List<ConnectionViewEntity> remotes = viewModel.Connections.Where(c => c.Key == packet.Key2).ToList();
 
-      remotes.ForEach(remote => {
-        remote.PacketsReceived = (remote.PacketsReceived ?? 0) + 1;
-        remote.BytesReceived   = (remote.BytesReceived   ?? 0) + packet.Bytes;
+        remotes.ForEach(remote => {
+            remote.PacketsReceived = (remote.PacketsReceived ?? 0) + 1;
+            remote.BytesReceived   = (remote.BytesReceived   ?? 0) + packet.Bytes;
 
-        remote.HasData  = true;
-        remote.IsNew    = false;
-        remote.IsClosed = false;
+            remote.HasData  = true;
+            remote.IsNew    = false;
+            remote.IsClosed = false;
 
-        remote.LastChange = DateTime.Now;
-      });
+            remote.LastChange = DateTime.Now;
+        });
 
-      if (!locals.Any() && !remotes.Any()) {
+        if (locals.Count != 0 || remotes.Count != 0) return;
+
         viewModel.DroppedPackets++;
 
         if (!viewModel.ViewDropped) return;
@@ -160,162 +172,155 @@ namespace TcpMonitor.Wpf.Controllers {
 
         if (exists) return;
 
-        if (!packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key)) {
-          bool isSourceLocal      = connectionService.IsLocalAddress(packet.SourceEndPoint);
-          bool isDestinationLocal = connectionService.IsLocalAddress(packet.DestinationEndPoint);
+        if (packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key)) return;
 
-          DomainConnection connection = mapper.Map<DomainConnection>(packet);
+        bool isSourceLocal      = connectionService.IsLocalAddress(packet.SourceEndPoint);
+        bool isDestinationLocal = connectionService.IsLocalAddress(packet.DestinationEndPoint);
 
-          if ((isSourceLocal && isDestinationLocal) || isSourceLocal) {
+        DomainConnection connection = mapper.Map<DomainConnection>(packet);
+
+        if ((isSourceLocal && isDestinationLocal) || isSourceLocal) {
             connection.Key = packet.Key1;
 
             connection.LocalEndPoint  = packet.SourceEndPoint;
             connection.RemoteEndPoint = packet.DestinationEndPoint;
-          }
-          else {
+        }
+        else {
             connection.Key = packet.Key2;
 
             connection.LocalEndPoint  = packet.DestinationEndPoint;
             connection.RemoteEndPoint = packet.SourceEndPoint;
-          }
-
-          connection.ResolveHostNamesAsync(connectionService).FireAndForget();
-
-          packets.Add(connection);
         }
-      }
+
+        packets.Add(connection);
     }
 
-    private void OnDeviceMessage(DomainDeviceError deviceMessage) {
-
-    }
+    private static void OnDeviceMessage(DomainDeviceError deviceMessage) { }
 
     private async void OnConnectionsTimerTick(object sender, EventArgs args) {
-      connectionsTimer.Stop();
+        connectionsTimer.Stop();
 
-      Stopwatch watch = Stopwatch.StartNew();
+        Stopwatch watch = Stopwatch.StartNew();
 
-      List<DomainConnection> incoming = await connectionService.GetConnectionsAsync().Fire();
+        List<DomainConnection> incoming = await connectionService.GetConnectionsAsync().Fire();
 
-      if (!viewModel.ViewPidZero) incoming.Where(c => c.Pid == 0).ToList().ForEach(c => incoming.Remove(c));
+        if (!viewModel.ViewPidZero) incoming.Where(c => c.Pid == 0).ToList().ForEach(c => incoming.Remove(c));
 
-      if (viewModel.ViewDropped) {
-        packets.Where(p => p.Pid != -1).ToList().ForEach(p => { packets.Remove(p); });
+        if (viewModel.ViewDropped) {
+            packets.Where(p => p.Pid != -1).ToList().ForEach(p => { packets.Remove(p); });
 
-        incoming.AddRange(packets);
-      }
+            incoming.AddRange(packets);
+        }
 
-      var mods = (from row1 in incoming
-                  join row2 in connections on row1.Key equals row2.Key
-                select new { Mod = row1, Match = row2 }).ToList();
+        var mods = (from row1 in incoming
+                    join row2 in connections on row1.Key equals row2.Key
+                  select new { Mod = row1, Match = row2 }).ToList();
 
-      mods.ForEach(set => mapper.Map(set.Mod, set.Match));
+        mods.ForEach(set => mapper.Map(set.Mod, set.Match));
 
-      List<DomainConnection> adds = (from row1 in incoming
-                                     join row2 in connections on row1.Key equals row2.Key into collGroup
-                                     from sub  in collGroup.DefaultIfEmpty()
-                                    where sub == null
-                                   select row1).ToList();
+        List<DomainConnection> adds = (from row1 in incoming
+                                       join row2 in connections on row1.Key equals row2.Key into collGroup
+                                       from sub  in collGroup.DefaultIfEmpty()
+                                      where sub == null
+                                     select row1).ToList();
 
-      adds.ForEach(add => add.ResolveHostNamesAsync(connectionService).FireAndForget());
+        adds.ForEach(add => add.ResolveHostNamesAsync(connectionService).FireAndForget());
 
-      connections.AddRange(adds);
+        connections.AddRange(adds);
 
-      List<DomainConnection> dels = (from row1 in connections
-                                     join row2 in incoming on row1.Key equals row2.Key into collGroup
-                                     from sub  in collGroup.DefaultIfEmpty()
-                                    where sub == null
-                                   select row1).ToList();
+        List<DomainConnection> dels = (from row1 in connections
+                                       join row2 in incoming on row1.Key equals row2.Key into collGroup
+                                       from sub  in collGroup.DefaultIfEmpty()
+                                      where sub == null
+                                     select row1).ToList();
 
-      dels.ForEach(del => connections.Remove(del));
+        dels.ForEach(del => connections.Remove(del));
 
-      viewModel.ConnectionsPass = watch.ElapsedMilliseconds;
+        viewModel.ConnectionsPass = watch.ElapsedMilliseconds;
 
-      connectionsTimer.Start();
+        if (!shutdown) connectionsTimer.Start();
     }
 
     private void OnDisplayTimerTick(object sender, EventArgs args) {
-      displayTimer.Stop();
+        displayTimer.Stop();
 
-      Stopwatch watch = Stopwatch.StartNew();
+        Stopwatch watch = Stopwatch.StartNew();
 
-      DateTime now = DateTime.Now;
+        DateTime now = DateTime.Now;
 
-      viewModel.Connections.Where(c => now - c.LastChange > highlightLagTime).ForEach(c => {
-        c.IsNew      = false;
-        c.HasChanged = false;
-        c.HasData    = false;
-      });
+        viewModel.Connections.Where(c => now - c.LastChange > highlightLagTime).ForEach(c => {
+            c.IsNew      = false;
+            c.HasChanged = false;
+            c.HasData    = false;
+        });
 
-      List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => now - c.LastChange > closedLagTime && c.IsClosed).ToList();
+        List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => now - c.LastChange > closedLagTime && c.IsClosed).ToList();
 
-      closed.ForEach(c => viewModel.Connections.Remove(c));
+        closed.ForEach(c => viewModel.Connections.Remove(c));
 
-      var mods = (from row1 in connections
-                  join row2 in viewModel.Connections on row1.Key equals row2.Key
-                select new { Mod = row1, Match = row2 }).ToList();
+        var mods = (from row1 in connections
+                    join row2 in viewModel.Connections on row1.Key equals row2.Key
+                  select new { Mod = row1, Match = row2 }).ToList();
 
-      mods.ForEach(set => {
-        if (set.Mod.Pid > 0 && set.Match.Pid > 0 && set.Mod.Pid != set.Match.Pid) return;
+        mods.ForEach(set => {
+            if (set.Mod.Pid > 0 && set.Match.Pid > 0 && set.Mod.Pid != set.Match.Pid) return;
 
-        if ((set.Mod.Pid > 0 && set.Match.Pid < 1) || set.Mod.ProcessName != set.Match.ProcessName || set.Mod.State != set.Match.State || set.Mod.LocalHostName != set.Match.LocalHostName || set.Mod.RemoteHostName != set.Match.RemoteHostName) {
-          set.Match.HasChanged = set.Mod.State != set.Match.State;
+            if ((set.Mod.Pid > 0 && set.Match.Pid < 1) || set.Mod.ProcessName != set.Match.ProcessName || set.Mod.State != set.Match.State || set.Mod.LocalHostName != set.Match.LocalHostName || set.Mod.RemoteHostName != set.Match.RemoteHostName) {
+                set.Match.HasChanged = set.Mod.State != set.Match.State;
 
-          mapper.Map(set.Mod, set.Match);
+                mapper.Map(set.Mod, set.Match);
+            }
+        });
+
+        List<DomainConnection> adds = (from row1 in connections
+                                       join row2 in viewModel.Connections on row1.Key equals row2.Key into collGroup
+                                       from sub  in collGroup.DefaultIfEmpty()
+                                      where sub == null
+                                     select row1).ToList();
+
+        List<ConnectionViewEntity> added = mapper.Map<List<ConnectionViewEntity>>(adds.Where(add => !String.IsNullOrEmpty(add.ProcessName)));
+
+        added.ForEach(add => add.IsNew = true);
+
+        viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
+
+        List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
+                                           join row2 in connections on row1.Key equals row2.Key into collGroup
+                                           from sub  in collGroup.DefaultIfEmpty()
+                                          where sub == null
+                                             && !row1.IsClosed
+                                         select row1).ToList();
+
+        dels.ForEach(del => { del.IsClosed = true; del.LastChange = DateTime.Now; });
+
+        viewModel.Connections.Sort(comparer);
+
+        if (viewModel.IsFiltered && !String.IsNullOrEmpty(viewModel.ConnectionFilter)) {
+            try {
+                Regex regex = new(viewModel.ConnectionFilter, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+                viewModel.Connections.ForEach(c => c.IsVisible = regex.IsMatch(c.ToString()));
+            }
+            catch(ArgumentException) { }
         }
-      });
+        else viewModel.Connections.ForEach(c => c.IsVisible = true);
 
-      List<DomainConnection> adds = (from row1 in connections
-                                     join row2 in viewModel.Connections on row1.Key equals row2.Key into collGroup
-                                     from sub  in collGroup.DefaultIfEmpty()
-                                    where sub == null
-                                   select row1).ToList();
+        if (viewModel.IsEstablished) viewModel.Connections.Where(c => c.IsVisible).ForEach(c => c.IsVisible = c.State == "Established" || (c.ConnectionType.StartsWith("UDP") && (c.BytesSent > 0 || c.BytesReceived > 0)));
 
-      List<ConnectionViewEntity> added = mapper.Map<List<ConnectionViewEntity>>(adds.Where(add => !String.IsNullOrEmpty(add.ProcessName)));
+        viewModel.UiPass = watch.ElapsedMilliseconds;
 
-      added.ForEach(add => add.IsNew = true);
-
-      viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
-
-      List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
-                                         join row2 in connections on row1.Key equals row2.Key into collGroup
-                                         from sub  in collGroup.DefaultIfEmpty()
-                                        where sub == null
-                                           && !row1.IsClosed
-                                       select row1).ToList();
-
-      dels.ForEach(del => { del.IsClosed = true; del.LastChange = DateTime.Now; });
-
-      viewModel.Connections.Sort(comparer);
-
-      if (viewModel.IsFiltered && !String.IsNullOrEmpty(viewModel.ConnectionFilter)) {
-        try {
-          Regex regex = new Regex(viewModel.ConnectionFilter, RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
-          viewModel.Connections.ForEach(c => c.IsVisible = regex.IsMatch(c.ToString()));
-        }
-        catch(ArgumentException) { }
-      }
-      else viewModel.Connections.ForEach(c => c.IsVisible = true);
-
-      if (viewModel.IsEstablished) viewModel.Connections.Where(c => c.IsVisible).ForEach(c => c.IsVisible = c.State == "Established");
-
-      viewModel.UiPass = watch.ElapsedMilliseconds;
-
-      displayTimer.Start();
+        if (!shutdown) displayTimer.Start();
     }
 
     private void OnMemoryTimerTick(object sender, EventArgs args) {
-      viewModel.TcpConnections = viewModel.Connections.Count(c => c.ConnectionType.StartsWith("TCP"));
-      viewModel.UdpConnections = viewModel.Connections.Count(c => c.ConnectionType.StartsWith("UDP"));
+        viewModel.TcpConnections = viewModel.Connections.Count(c => c.IsVisible && c.ConnectionType.StartsWith("TCP"));
+        viewModel.UdpConnections = viewModel.Connections.Count(c => c.IsVisible && c.ConnectionType.StartsWith("UDP"));
 
-      using Process process = Process.GetCurrentProcess();
+        using Process process = Process.GetCurrentProcess();
 
-      viewModel.Memory = process.WorkingSet64 / 1024.0 / 1024.0;
+        viewModel.Memory = process.WorkingSet64 / 1024.0 / 1024.0;
     }
 
     #endregion Private Methods
-
-  }
 
 }

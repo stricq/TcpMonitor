@@ -2,9 +2,17 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <AssemblyName>TcpMonitor</AssemblyName>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>false</Optimize>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,11 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="9.0.0" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="STR.Common" Version="3.0.2" />
-    <PackageReference Include="STR.DialogView" Version="3.0.1-resources.200551846" />
-    <PackageReference Include="STR.MvvmCommon" Version="3.0.0" />
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="STR.Common" Version="8.0.0" />
+    <PackageReference Include="STR.DialogView" Version="8.0.0" />
+    <PackageReference Include="STR.MvvmCommon" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>

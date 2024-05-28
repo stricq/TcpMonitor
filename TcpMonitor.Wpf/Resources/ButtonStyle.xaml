@@ -54,7 +54,8 @@
               <Setter TargetName="ContentPresenter" Property="TextBlock.Foreground" Value="{StaticResource StatusBarBorderColor}" />
             </Trigger>
             <Trigger Property="IsChecked" Value="True">
-              <Setter TargetName="Background" Property="Background" Value="{StaticResource ToggleHighlightGradient}" />
+              <Setter TargetName="Background" Property="Background"  Value="{StaticResource ToggleHighlightGradient}" />
+              <Setter TargetName="Background" Property="BorderBrush" Value="{StaticResource ToggleHighlightBorderColor}" />
             </Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Windows;
 
-using AutoMapper;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Str.Common.Extensions;
 using Str.DialogView.Extensions;
 
 using Str.MvvmCommon.Contracts;
@@ -23,9 +22,10 @@ using TcpMonitor.Wpf.ViewModels;
 using TcpMonitor.Wpf.Views;
 
 
-namespace TcpMonitor.Wpf {
+namespace TcpMonitor.Wpf;
 
-  internal sealed partial class App : Application {
+
+internal sealed partial class App : Application {
 
     #region Private Fields
 
@@ -36,9 +36,9 @@ namespace TcpMonitor.Wpf {
     #region Constructor
 
     public App() {
-      container = new MvvmContainer();
+        container = new MvvmContainer();
 
-      container.Initialize(ConfigureServices);
+        container.Initialize(ConfigureServices);
     }
 
     #endregion Constructor
@@ -46,26 +46,26 @@ namespace TcpMonitor.Wpf {
     #region Overrides
 
     protected override void OnStartup(StartupEventArgs e) {
-      container.OnStartup();
+        container.OnStartupAsync().FireAndWait();
 
-      try {
-        container.InitializeControllers();
-      }
-      catch(Exception ex) {
-        while(ex.InnerException != null) ex = ex.InnerException;
+        try {
+            container.InitializeControllersAsync().FireAndWait();
+        }
+        catch(Exception ex) {
+            while(ex.InnerException != null) ex = ex.InnerException;
 
-        MessageBox.Show(ex.Message, "Dependency Injection Error");
-      }
+            MessageBox.Show(ex.Message, "Dependency Injection Error");
+        }
 
-      container.Get<TcpMonitorView>().Show();
+        container.Get<TcpMonitorView>().Show();
 
-      base.OnStartup(e);
+        base.OnStartup(e);
     }
 
     protected override void OnExit(ExitEventArgs args) {
-      container.OnExit();
+        container.OnExitAsync().FireAndWait();
 
-      base.OnExit(args);
+        base.OnExit(args);
     }
 
     #endregion Overrides
@@ -73,27 +73,25 @@ namespace TcpMonitor.Wpf {
     #region Private Methods
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration) {
-      services.AddAutoMapper(typeof(ViewEntityMappingConfiguration), typeof(DomainModelMappingConfiguration));
+        services.AddAutoMapper(typeof(ViewEntityMappingConfiguration), typeof(DomainModelMappingConfiguration));
 
-      services.AddStrDialogView();
+        services.AddStrDialogView();
 
-      services.AddSingleton<TcpMonitorView>();
+        services.AddSingleton<TcpMonitorView>();
 
-      services.AddSingleton<IController, ConnectionsController>();
-      services.AddSingleton<ConnectionsViewModel>();
+        services.AddSingleton<IController, ConnectionsController>();
+        services.AddSingleton<ConnectionsViewModel>();
 
-      services.AddSingleton<IController, TcpMonitorController>();
-      services.AddSingleton<TcpMonitorViewModel>();
+        services.AddSingleton<IController, TcpMonitorController>();
+        services.AddSingleton<TcpMonitorViewModel>();
 
-      services.AddSingleton<IWindowSettingsRepository, SettingsRepository>();
+        services.AddSingleton<IWindowSettingsRepository, SettingsRepository>();
 
-      services.AddSingleton<IConnectionsService, ConnectionsService>();
+        services.AddSingleton<IConnectionsService, ConnectionsService>();
 
-      services.AddSingleton<ICapturePackets, PacketCaptureService>();
+        services.AddSingleton<ICapturePackets, PacketCaptureService>();
     }
 
     #endregion Private Methods
-
-  }
 
 }

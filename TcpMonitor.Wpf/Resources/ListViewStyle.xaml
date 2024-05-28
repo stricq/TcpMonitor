@@ -153,7 +153,7 @@
   <Style x:Key="{x:Type ListViewItem}" TargetType="{x:Type ListViewItem}">
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="VerticalContentAlignment" Value="Top" />
-    <Setter Property="IsSelected" Value="{Binding Path=(ve:ConnectionViewEntity.IsSelected), Mode=TwoWay}" />
+    <Setter Property="IsSelected" Value="{Binding Path=(ve:ConnectionViewEntity.IsSelected)}" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type ListViewItem}">

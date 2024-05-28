@@ -24,6 +24,8 @@
 
   <SolidColorBrush x:Key="TextBoxBackgroundColor" Color="#FF2E2F34" />
 
+    <SolidColorBrush x:Key="ToggleHighlightBorderColor" Color="#a163ca" />
+
   <!-- Gradients -->
 
   <LinearGradientBrush x:Key="GridSplitterGradientLeftRight" EndPoint="1,0.5" StartPoint="0,0.5">
