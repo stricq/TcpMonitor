@@ -1,22 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition.Hosting;
-using System.IO;
 using System.Windows;
 
-using AutoMapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 using Str.Common.Extensions;
+using Str.DialogView.Extensions;
 
 using Str.MvvmCommon.Contracts;
 using Str.MvvmCommon.Core;
 
 using TcpMonitor.Domain.Contracts;
 
+using TcpMonitor.Repository.Mappings;
+using TcpMonitor.Repository.Repositories;
+using TcpMonitor.Repository.Services;
 
-namespace TcpMonitor.Wpf {
+using TcpMonitor.Wpf.Controllers;
+using TcpMonitor.Wpf.Mappings;
+using TcpMonitor.Wpf.ViewModels;
+using TcpMonitor.Wpf.Views;
 
-  internal sealed partial class App : Application {
+
+namespace TcpMonitor.Wpf;
+
+
+internal sealed partial class App : Application {
 
     #region Private Fields
 
@@ -27,11 +36,9 @@ namespace TcpMonitor.Wpf {
     #region Constructor
 
     public App() {
-      container = new MvvmContainer();
+        container = new MvvmContainer();
 
-      container.Initialize(() => new AggregateCatalog(new DirectoryCatalog(Directory.GetCurrentDirectory(), "TcpMonitor.dll"),
-                                                      new DirectoryCatalog(Directory.GetCurrentDirectory(), "TcpMonitor.*.dll"),
-                                                      new DirectoryCatalog(Directory.GetCurrentDirectory(), "Str.*.dll")));
+        container.Initialize(ConfigureServices);
     }
 
     #endregion Constructor
@@ -39,35 +46,52 @@ namespace TcpMonitor.Wpf {
     #region Overrides
 
     protected override void OnStartup(StartupEventArgs e) {
-      TaskHelper.RunOnUiThread(() => { }).FireAndForget(); // Initialize the synchronization context.
-
-      try {
-        IEnumerable<IAutoMapperConfiguration> configurations = container.GetAll<IAutoMapperConfiguration>();
-
-        MapperConfiguration mapperConfiguration = new MapperConfiguration(cfg => configurations.ForEach(configuration => configuration.RegisterMappings(cfg)));
+        container.OnStartupAsync().FireAndWait();
 
         try {
-          mapperConfiguration.AssertConfigurationIsValid();
+            container.InitializeControllersAsync().FireAndWait();
         }
         catch(Exception ex) {
-          MessageBox.Show(ex.Message, "Mapping Validation Error");
+            while(ex.InnerException != null) ex = ex.InnerException;
+
+            MessageBox.Show(ex.Message, "Dependency Injection Error");
         }
 
-        container.RegisterInstance(mapperConfiguration.CreateMapper());
+        container.Get<TcpMonitorView>().Show();
 
-        container.InitializeControllers();
-      }
-      catch(Exception ex) {
-        while(ex.InnerException != null) ex = ex.InnerException;
+        base.OnStartup(e);
+    }
 
-        MessageBox.Show(ex.Message, "MEF Error");
-      }
+    protected override void OnExit(ExitEventArgs args) {
+        container.OnExitAsync().FireAndWait();
 
-      base.OnStartup(e);
+        base.OnExit(args);
     }
 
     #endregion Overrides
 
+    #region Private Methods
+
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration) {
+        services.AddAutoMapper(typeof(ViewEntityMappingConfiguration), typeof(DomainModelMappingConfiguration));
+
+        services.AddStrDialogView();
+
+        services.AddSingleton<TcpMonitorView>();
+
+        services.AddSingleton<IController, ConnectionsController>();
+        services.AddSingleton<ConnectionsViewModel>();
+
+        services.AddSingleton<IController, TcpMonitorController>();
+        services.AddSingleton<TcpMonitorViewModel>();
+
+        services.AddSingleton<IWindowSettingsRepository, SettingsRepository>();
+
+        services.AddSingleton<IConnectionsService, ConnectionsService>();
+
+        services.AddSingleton<ICapturePackets, PacketCaptureService>();
     }
+
+    #endregion Private Methods
 
 }

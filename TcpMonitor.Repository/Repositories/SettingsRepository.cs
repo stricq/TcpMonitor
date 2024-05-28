@@ -1,9 +1,10 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.IO;
 using System.Threading.Tasks;
 
 using Newtonsoft.Json;
+
+using Str.Common.Extensions;
 
 using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
@@ -11,7 +12,6 @@ using TcpMonitor.Domain.Models;
 
 namespace TcpMonitor.Repository.Repositories {
 
-  [Export(typeof(IWindowSettingsRepository))]
   public class SettingsRepository : IWindowSettingsRepository {
 
     #region Private Fields
@@ -33,8 +33,8 @@ namespace TcpMonitor.Repository.Repositories {
     public async Task<DomainWindowSettings> LoadWindowSettingsAsync() {
       DomainWindowSettings settings;
 
-      if (await Task.Run(() => File.Exists(WindowSettingsFile))) {
-        settings = await Task.Run(() => JsonConvert.DeserializeObject<DomainWindowSettings>(File.ReadAllText(WindowSettingsFile)));
+      if (await Task.Run(() => File.Exists(WindowSettingsFile)).Fire()) {
+        settings = await Task.Run(() => JsonConvert.DeserializeObject<DomainWindowSettings>(File.ReadAllText(WindowSettingsFile))).Fire();
       }
       else settings = new DomainWindowSettings {
         WindowW = 1024,
@@ -48,11 +48,11 @@ namespace TcpMonitor.Repository.Repositories {
     }
 
     public async Task SaveWindowSettingsAsync(DomainWindowSettings settings) {
-      string json = await Task.Run(() => JsonConvert.SerializeObject(settings, Formatting.Indented));
+      string json = await Task.Run(() => JsonConvert.SerializeObject(settings, Formatting.Indented)).Fire();
 
-      if (!await Task.Run(() => File.Exists(WindowSettingsFile))) await Task.Run(() => Directory.CreateDirectory(Path.GetDirectoryName(WindowSettingsFile)));
+      if (!await Task.Run(() => File.Exists(WindowSettingsFile)).Fire()) await Task.Run(() => Directory.CreateDirectory(Path.GetDirectoryName(WindowSettingsFile))).Fire();
 
-      await Task.Run(() => File.WriteAllText(WindowSettingsFile, json));
+      await Task.Run(() => File.WriteAllText(WindowSettingsFile, json)).Fire();
     }
 
     #endregion IWindowSettingsRepository Implementation

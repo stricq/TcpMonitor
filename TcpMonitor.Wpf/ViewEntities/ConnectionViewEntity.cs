@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Str.MvvmCommon.Core;
 
 

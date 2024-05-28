@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using AutoMapper;
@@ -16,13 +16,11 @@ using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
 
 using TcpMonitor.Repository.IpService;
-
-using TcpMonitor.Repository.Models.IpService;
+using TcpMonitor.Repository.Models;
 
 
 namespace TcpMonitor.Repository.Services {
 
-  [Export(typeof(IConnectionsService))]
   [SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Assignment is requireed by the called dll.")]
   public class ConnectionsService : IConnectionsService {
 
@@ -40,7 +38,6 @@ namespace TcpMonitor.Repository.Services {
 
     #region Constructor
 
-    [ImportingConstructor]
     public ConnectionsService(IMapper mapper) {
       this.mapper = mapper;
 
@@ -118,7 +115,7 @@ namespace TcpMonitor.Repository.Services {
 
       int index = 0;
 
-      int entries = BitConverter.ToInt32(tcpTable, index); index += 4;
+      int entries = BitConverter.ToInt32(tcpTable, index); index = 4;
 
       List<Connection> table = new List<Connection>(entries);
 
@@ -157,7 +154,7 @@ namespace TcpMonitor.Repository.Services {
 
       int index = 0;
 
-      int entries = BitConverter.ToInt32(tcpTable, index); index += 4;
+      int entries = BitConverter.ToInt32(tcpTable, index); index = 4;
 
       List<Connection> table = new List<Connection>(entries);
 
@@ -200,7 +197,7 @@ namespace TcpMonitor.Repository.Services {
 
       int index = 0;
 
-      int entries = BitConverter.ToInt32(udpTable, index); index += 4;
+      int entries = BitConverter.ToInt32(udpTable, index); index = 4;
 
       List<Connection> table = new List<Connection>(entries);
 
@@ -231,7 +228,7 @@ namespace TcpMonitor.Repository.Services {
 
       int index = 0;
 
-      int entries = BitConverter.ToInt32(udpTable, index); index += 4;
+      int entries = BitConverter.ToInt32(udpTable, index); index = 4;
 
       List<Connection> table = new List<Connection>(entries);
 
@@ -278,6 +275,7 @@ namespace TcpMonitor.Repository.Services {
       };
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static uint ConvertPort(uint port) {
       return ((port & 0xff) << 8) | (port >> 8);
     }

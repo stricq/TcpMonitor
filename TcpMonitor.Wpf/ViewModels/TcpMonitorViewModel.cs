@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 
@@ -11,8 +10,6 @@ using TcpMonitor.Wpf.ViewEntities;
 
 namespace TcpMonitor.Wpf.ViewModels {
 
-  [Export]
-  [ViewModel(nameof(TcpMonitorViewModel))]
   [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
   public class TcpMonitorViewModel : ObservableObject {
 

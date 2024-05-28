@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -22,7 +21,6 @@ using TcpMonitor.Wpf.ViewModels;
 
 namespace TcpMonitor.Wpf.Controllers {
 
-  [Export(typeof(IController))]
   public class TcpMonitorController : IController {
 
     #region Private Fields
@@ -40,7 +38,6 @@ namespace TcpMonitor.Wpf.Controllers {
 
     #region Constructor
 
-    [ImportingConstructor]
     public TcpMonitorController(TcpMonitorViewModel viewModel, IMessenger messenger, IMapper mapper, IWindowSettingsRepository settingsRepository) {
       if (Application.Current != null) Application.Current.DispatcherUnhandledException += OnCurrentDispatcherUnhandledException;
 
@@ -80,12 +77,10 @@ namespace TcpMonitor.Wpf.Controllers {
       viewModel.Closing     = new RelayCommandAsync<CancelEventArgs>(OnClosingAsync);
     }
 
-    private Task OnInitializedAsync(EventArgs args) {
+    private async Task OnInitializedAsync(EventArgs args) {
       isStartupComplete = true;
 
-      messenger.Send(new ApplicationInitializedMessage());
-
-      return Task.CompletedTask;
+      await messenger.SendAsync(new ApplicationInitializedMessage()).Fire();
     }
 
     private async Task OnLoadedAsync(RoutedEventArgs args) {
@@ -93,7 +88,7 @@ namespace TcpMonitor.Wpf.Controllers {
     }
 
     private async Task OnClosingAsync(CancelEventArgs args) {
-      ApplicationClosingMessage message = new ApplicationClosingMessage();
+      ApplicationClosingMessage message = new();
 
       await messenger.SendAsync(message).Fire();
 
@@ -107,7 +102,7 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Private Methods
 
     private void OnDomainUnhandledException(object sender, UnhandledExceptionEventArgs e) {
-      if (!(e.ExceptionObject is Exception ex)) return;
+      if (e.ExceptionObject is not Exception ex) return;
 
       if (e.IsTerminating) MessageBox.Show(ex.Message, "Fatal Domain Unhandled Exception");
       else messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Domain Unhandled Exception", Exception = ex });
@@ -131,11 +126,11 @@ namespace TcpMonitor.Wpf.Controllers {
     }
 
     private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) {
-      if (e.Exception == null || e.Exception.InnerExceptions.Count == 0) return;
+      if (e.Exception.InnerExceptions.Count == 0) return;
 
       foreach(Exception ex in e.Exception.InnerExceptions) {
         if (isStartupComplete) {
-          messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Unobserved Task Exception", Exception = ex });
+          messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Unobserved Task Exception", Exception = ex }).FireAndWait();
         }
         else {
           MessageBox.Show(ex.Message, "Fatal Unobserved Task Exception");
