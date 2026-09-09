@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33213.308
+# Visual Studio Version 18
+VisualStudioVersion = 18.9.12120.119 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpMonitor.Wpf", "TcpMonitor.Wpf\TcpMonitor.Wpf.csproj", "{E387D901-ED2B-4E21-ADC7-3D3CB899860A}"
 EndProject
@@ -24,6 +24,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpMonitor.Repository", "TcpMonitor.Repository\TcpMonitor.Repository.csproj", "{22493A0F-00BD-40F0-8FF0-E8E94FFC556B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpMonitor.Repository.IpService", "TcpMonitor.Repository.IpService\TcpMonitor.Repository.IpService.csproj", "{A794103F-F3E6-49E6-8035-AAA77E5E3D3D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{3E9080A4-A6CC-428C-A991-F16E2E850019}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-publish.yml = .github\workflows\build-publish.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -128,6 +135,8 @@ Global
 		{F211FDF1-F515-4ECE-8B13-F9E0EC1EFA99} = {431FDAD5-66D4-45F1-A9F3-42A27D82AAD8}
 		{22493A0F-00BD-40F0-8FF0-E8E94FFC556B} = {2A22484F-1472-4614-9D43-790BCE917DE6}
 		{A794103F-F3E6-49E6-8035-AAA77E5E3D3D} = {2A22484F-1472-4614-9D43-790BCE917DE6}
+		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {B55B0962-C6E8-4D82-896F-41118FCBF0CF}
+		{3E9080A4-A6CC-428C-A991-F16E2E850019} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DB3F0C96-96C2-4C63-873A-3792FCFA610F}

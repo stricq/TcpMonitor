@@ -1,6 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -19,9 +18,11 @@ using TcpMonitor.Wpf.ViewEntities;
 using TcpMonitor.Wpf.ViewModels;
 
 
-namespace TcpMonitor.Wpf.Controllers {
+namespace TcpMonitor.Wpf.Controllers;
 
-  public class TcpMonitorController : IController {
+
+[SuppressMessage("ReSharper", "UnusedType.Global", Justification = "Dependency Injection by Convention.")]
+public class TcpMonitorController : IController {
 
     #region Private Fields
 
@@ -30,7 +31,7 @@ namespace TcpMonitor.Wpf.Controllers {
     private readonly TcpMonitorViewModel viewModel;
 
     private readonly IMessenger messenger;
-    private readonly IMapper    mapper;
+    private readonly IMapper mapper;
 
     private readonly IWindowSettingsRepository settingsRepository;
 
@@ -39,32 +40,32 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Constructor
 
     public TcpMonitorController(TcpMonitorViewModel viewModel, IMessenger messenger, IMapper mapper, IWindowSettingsRepository settingsRepository) {
-      if (Application.Current != null) Application.Current.DispatcherUnhandledException += OnCurrentDispatcherUnhandledException;
+        if (Application.Current != null) Application.Current.DispatcherUnhandledException += OnCurrentDispatcherUnhandledException;
 
-      AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
 
-      Dispatcher.CurrentDispatcher.UnhandledException += OnCurrentDispatcherUnhandledException;
+        Dispatcher.CurrentDispatcher.UnhandledException += OnCurrentDispatcherUnhandledException;
 
-      TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-      this.viewModel = viewModel;
+        this.viewModel = viewModel;
 
-      this.messenger = messenger;
-         this.mapper = mapper;
+        this.messenger = messenger;
+        this.mapper = mapper;
 
-      this.settingsRepository = settingsRepository;
+        this.settingsRepository = settingsRepository;
     }
 
     #endregion Constructor
 
     #region IController Implementation
 
-    public int InitializePriority { get; } = 1000;
+    public int InitializePriority => 1000;
 
     public async Task InitializeAsync() {
-      viewModel.Settings = mapper.Map<WindowSettingsViewEntity>(await settingsRepository.LoadWindowSettingsAsync().Fire());
+        viewModel.Settings = mapper.Map<WindowSettingsViewEntity>(await settingsRepository.LoadWindowSettingsAsync().Fire());
 
-      RegisterCommands();
+        RegisterCommands();
     }
 
     #endregion IController Implementation
@@ -72,29 +73,29 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Commands
 
     private void RegisterCommands() {
-      viewModel.Initialized = new RelayCommandAsync<EventArgs>(OnInitializedAsync);
-      viewModel.Loaded      = new RelayCommandAsync<RoutedEventArgs>(OnLoadedAsync);
-      viewModel.Closing     = new RelayCommandAsync<CancelEventArgs>(OnClosingAsync);
+        viewModel.Initialized = new RelayCommandAsync<EventArgs>(OnInitializedAsync);
+        viewModel.Loaded = new RelayCommandAsync<RoutedEventArgs>(OnLoadedAsync);
+        viewModel.Closing = new RelayCommandAsync<CancelEventArgs>(OnClosingAsync);
     }
 
     private async Task OnInitializedAsync(EventArgs args) {
-      isStartupComplete = true;
+        isStartupComplete = true;
 
-      await messenger.SendAsync(new ApplicationInitializedMessage()).Fire();
+        await messenger.SendAsync(new ApplicationInitializedMessage()).Fire();
     }
 
     private async Task OnLoadedAsync(RoutedEventArgs args) {
-      await messenger.SendAsync(new ApplicationLoadedMessage()).Fire();
+        await messenger.SendAsync(new ApplicationLoadedMessage()).Fire();
     }
 
     private async Task OnClosingAsync(CancelEventArgs args) {
-      ApplicationClosingMessage message = new();
+        ApplicationClosingMessage message = new();
 
-      await messenger.SendAsync(message).Fire();
+        await messenger.SendAsync(message).Fire();
 
-      if (!message.Cancel && viewModel.Settings.AreSettingsChanged) await SaveSettingsAsync().Fire();
+        if (!message.Cancel && viewModel.Settings!.AreSettingsChanged) await SaveSettingsAsync().Fire();
 
-      args.Cancel = message.Cancel;
+        args.Cancel = message.Cancel;
     }
 
     #endregion Commands
@@ -102,52 +103,50 @@ namespace TcpMonitor.Wpf.Controllers {
     #region Private Methods
 
     private void OnDomainUnhandledException(object sender, UnhandledExceptionEventArgs e) {
-      if (e.ExceptionObject is not Exception ex) return;
+        if (e.ExceptionObject is not Exception ex) return;
 
-      if (e.IsTerminating) MessageBox.Show(ex.Message, "Fatal Domain Unhandled Exception");
-      else messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Domain Unhandled Exception", Exception = ex });
+        if (e.IsTerminating) MessageBox.Show(ex.Message, "Fatal Domain Unhandled Exception");
+        else messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Domain Unhandled Exception", Exception = ex });
     }
 
     private void OnCurrentDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
-      if (e.Exception == null) return;
+        if (e.Exception == null) return;
 
-      if (isStartupComplete) {
-        messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Dispatcher Unhandled Exception", Exception = e.Exception });
-
-        e.Handled = true;
-      }
-      else {
-        e.Handled = true;
-
-        MessageBox.Show(e.Exception.Message, "Fatal Dispatcher Exception");
-
-        Application.Current.Shutdown();
-      }
-    }
-
-    private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) {
-      if (e.Exception.InnerExceptions.Count == 0) return;
-
-      foreach(Exception ex in e.Exception.InnerExceptions) {
         if (isStartupComplete) {
-          messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Unobserved Task Exception", Exception = ex }).FireAndWait();
+            messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Dispatcher Unhandled Exception", Exception = e.Exception });
+
+            e.Handled = true;
         }
         else {
-          MessageBox.Show(ex.Message, "Fatal Unobserved Task Exception");
+            e.Handled = true;
+
+            MessageBox.Show(e.Exception.Message, "Fatal Dispatcher Exception");
+
+            Application.Current.Shutdown();
         }
-      }
+    }
 
-      if (!isStartupComplete) Application.Current.Shutdown();
+    private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e) {
+        if (e.Exception.InnerExceptions.Count == 0) return;
 
-      e.SetObserved();
+        foreach (Exception ex in e.Exception.InnerExceptions) {
+            if (isStartupComplete) {
+                messenger.SendOnUiThreadAsync(new ApplicationErrorMessage { HeaderText = "Unobserved Task Exception", Exception = ex }).FireAndWait();
+            }
+            else {
+                MessageBox.Show(ex.Message, "Fatal Unobserved Task Exception");
+            }
+        }
+
+        if (!isStartupComplete) Application.Current.Shutdown();
+
+        e.SetObserved();
     }
 
     private async Task SaveSettingsAsync() {
-      await settingsRepository.SaveWindowSettingsAsync(mapper.Map<DomainWindowSettings>(viewModel.Settings)).Fire();
+        await settingsRepository.SaveWindowSettingsAsync(mapper.Map<DomainWindowSettings>(viewModel.Settings)).Fire();
     }
 
     #endregion Private Methods
-
-  }
 
 }

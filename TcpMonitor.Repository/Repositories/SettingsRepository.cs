@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 using Str.Common.Extensions;
 
@@ -10,9 +6,10 @@ using TcpMonitor.Domain.Contracts;
 using TcpMonitor.Domain.Models;
 
 
-namespace TcpMonitor.Repository.Repositories {
+namespace TcpMonitor.Repository.Repositories;
 
-  public class SettingsRepository : IWindowSettingsRepository {
+
+public class SettingsRepository : IWindowSettingsRepository {
 
     #region Private Fields
 
@@ -23,7 +20,7 @@ namespace TcpMonitor.Repository.Repositories {
     #region Constructor
 
     static SettingsRepository() {
-      WindowSettingsFile  = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"STR Programming Services\TCP Monitor\WindowSettings.json");
+        WindowSettingsFile  = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"STR Programming Services\TCP Monitor\WindowSettings.json");
     }
 
     #endregion Constructor
@@ -31,32 +28,33 @@ namespace TcpMonitor.Repository.Repositories {
     #region IWindowSettingsRepository Implementation
 
     public async Task<DomainWindowSettings> LoadWindowSettingsAsync() {
-      DomainWindowSettings settings;
+        DomainWindowSettings? settings = null;
 
-      if (await Task.Run(() => File.Exists(WindowSettingsFile)).Fire()) {
-        settings = await Task.Run(() => JsonConvert.DeserializeObject<DomainWindowSettings>(File.ReadAllText(WindowSettingsFile))).Fire();
-      }
-      else settings = new DomainWindowSettings {
-        WindowW = 1024,
-        WindowH = 768,
+        if (File.Exists(WindowSettingsFile)) {
+            settings = JsonConvert.DeserializeObject<DomainWindowSettings>(await File.ReadAllTextAsync(WindowSettingsFile).Fire());
+        }
 
-        WindowX = 100,
-        WindowY = 100,
-      };
-
-      return settings;
+        return settings ?? new DomainWindowSettings {
+            WindowW = 1024,
+            WindowH = 768,
+            WindowX = 100,
+            WindowY = 100,
+        };
     }
 
     public async Task SaveWindowSettingsAsync(DomainWindowSettings settings) {
-      string json = await Task.Run(() => JsonConvert.SerializeObject(settings, Formatting.Indented)).Fire();
+        string json = JsonConvert.SerializeObject(settings, Formatting.Indented);
 
-      if (!await Task.Run(() => File.Exists(WindowSettingsFile)).Fire()) await Task.Run(() => Directory.CreateDirectory(Path.GetDirectoryName(WindowSettingsFile))).Fire();
+        if (!File.Exists(WindowSettingsFile)) {
+            string path = Path.GetDirectoryName(WindowSettingsFile)
+                       ?? throw new ArgumentException($"The Windows Settings File path, {WindowSettingsFile}, is not valid.");
 
-      await Task.Run(() => File.WriteAllText(WindowSettingsFile, json)).Fire();
+            Directory.CreateDirectory(path);
+        }
+
+        await File.WriteAllTextAsync(WindowSettingsFile, json).Fire();
     }
 
     #endregion IWindowSettingsRepository Implementation
-
-  }
 
 }

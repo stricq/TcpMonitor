@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
 
-namespace TcpMonitor.Repository.IpService {
+namespace TcpMonitor.Repository.IpService.Constants;
 
-  [SuppressMessage("ReSharper", "InconsistentNaming")]
-  public static class State {
+
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+public static class State {
 
     public const int MIB_TCP_STATE_CLOSED     =  1;
     public const int MIB_TCP_STATE_LISTEN     =  2;
@@ -18,7 +19,5 @@ namespace TcpMonitor.Repository.IpService {
     public const int MIB_TCP_STATE_LAST_ACK   = 10;
     public const int MIB_TCP_STATE_TIME_WAIT  = 11;
     public const int MIB_TCP_STATE_DELETE_TCB = 12;
-
-  }
 
 }

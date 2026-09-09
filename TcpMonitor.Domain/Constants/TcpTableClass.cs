@@ -1,8 +1,11 @@
-﻿
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace TcpMonitor.Repository.IpService {
+namespace TcpMonitor.Domain.Constants;
 
-  public enum TcpTableClass {
+
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
+public enum TcpTableClass {
+
     TCP_TABLE_BASIC_LISTENER,
     TCP_TABLE_BASIC_CONNECTIONS,
     TCP_TABLE_BASIC_ALL,
@@ -11,7 +14,6 @@ namespace TcpMonitor.Repository.IpService {
     TCP_TABLE_OWNER_PID_ALL,
     TCP_TABLE_OWNER_MODULE_LISTENER,
     TCP_TABLE_OWNER_MODULE_CONNECTIONS,
-    TCP_TABLE_OWNER_MODULE_ALL,
-  }
+    TCP_TABLE_OWNER_MODULE_ALL
 
 }

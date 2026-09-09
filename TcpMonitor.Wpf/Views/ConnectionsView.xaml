@@ -126,6 +126,8 @@
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
@@ -166,15 +168,21 @@
 
       <Separator Grid.Column="9" />
 
-      <Separator Grid.Column="11" />
-
-      <StatusBarItem Grid.Column="12">
-        <TextBlock Text="{Binding Path=Memory, StringFormat='Memory: {0:N1}MB'}" Margin="0" Foreground="White" />
+      <StatusBarItem Grid.Column="10">
+          <TextBlock Text="{Binding Path=PacketQueue, StringFormat='Packet Queue: {0:N0}'}" Margin="0" Foreground="White" />
       </StatusBarItem>
+
+      <Separator Grid.Column="11" />
 
       <Separator Grid.Column="13" />
 
-      <StatusBarItem Grid.Column="14" Width="17" />
+      <StatusBarItem Grid.Column="14">
+        <TextBlock Text="{Binding Path=Memory, StringFormat='Memory: {0:N1}MB'}" Margin="0" Foreground="White" />
+      </StatusBarItem>
+
+      <Separator Grid.Column="15" />
+
+      <StatusBarItem Grid.Column="16" Width="17" />
     </StatusBar>
 
   </Grid>

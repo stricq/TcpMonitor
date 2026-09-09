@@ -1,24 +1,22 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Str.Common.Extensions;
+
 using Str.DialogView.Extensions;
 
-using Str.MvvmCommon.Contracts;
 using Str.MvvmCommon.Core;
 
 using TcpMonitor.Domain.Contracts;
 
+using TcpMonitor.Repository.IpService;
 using TcpMonitor.Repository.Mappings;
 using TcpMonitor.Repository.Repositories;
 using TcpMonitor.Repository.Services;
 
-using TcpMonitor.Wpf.Controllers;
 using TcpMonitor.Wpf.Mappings;
-using TcpMonitor.Wpf.ViewModels;
 using TcpMonitor.Wpf.Views;
 
 
@@ -29,7 +27,7 @@ internal sealed partial class App : Application {
 
     #region Private Fields
 
-    private readonly IMvvmContainer container;
+    private readonly MvvmContainer container;
 
     #endregion Private Fields
 
@@ -77,19 +75,13 @@ internal sealed partial class App : Application {
 
         services.AddStrDialogView();
 
-        services.AddSingleton<TcpMonitorView>();
-
-        services.AddSingleton<IController, ConnectionsController>();
-        services.AddSingleton<ConnectionsViewModel>();
-
-        services.AddSingleton<IController, TcpMonitorController>();
-        services.AddSingleton<TcpMonitorViewModel>();
-
         services.AddSingleton<IWindowSettingsRepository, SettingsRepository>();
 
         services.AddSingleton<IConnectionsService, ConnectionsService>();
 
         services.AddSingleton<ICapturePackets, PacketCaptureService>();
+
+        services.AddSingleton<IIpHelperApi, IpHelperApi>();
     }
 
     #endregion Private Methods

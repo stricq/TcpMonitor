@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Net;
-using System.Threading.Tasks;
 
 using PacketDotNet;
 
@@ -20,13 +18,13 @@ public sealed class PacketCaptureService : ICapturePackets {
 
     #region Private Fields
 
+    private readonly ConcurrentBag<ICaptureDevice> startedDevices = [];
+
     private bool initialized;
 
-    private Action<DomainPacket> callback;
+    private Action<DomainPacket>? callback;
 
-    private CaptureDeviceList devices;
-
-    private ConcurrentBag<ICaptureDevice> startedDevices;
+    private CaptureDeviceList? devices;
 
     #endregion Private Fields
 
@@ -34,8 +32,6 @@ public sealed class PacketCaptureService : ICapturePackets {
 
     public async Task RegisterPacketCaptureAsync(Action<DomainPacket> packetCallback, Action<DomainDeviceError> deviceCallback) {
         callback = packetCallback;
-
-        startedDevices = [];
 
         DomainDeviceError deviceMessage = new();
 
@@ -140,7 +136,7 @@ public sealed class PacketCaptureService : ICapturePackets {
             return;
         }
 
-        callback(domainPacket);
+        callback?.Invoke(domainPacket);
     }
 
     #endregion Private Methods

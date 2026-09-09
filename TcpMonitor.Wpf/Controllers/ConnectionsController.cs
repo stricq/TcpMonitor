@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Threading;
 
 using AutoMapper;
@@ -25,6 +23,7 @@ using TcpMonitor.Wpf.ViewModels;
 namespace TcpMonitor.Wpf.Controllers;
 
 
+[SuppressMessage("ReSharper", "UnusedType.Global", Justification = "Dependency Injection by Convention.")]
 public sealed class ConnectionsController : IController, IMessageReceiver {
 
     #region Private Fields
@@ -37,9 +36,10 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
     private readonly LockingList<DomainConnection> connections;
     private readonly LockingList<DomainConnection> packets;
 
-    private readonly DispatcherTimer connectionsTimer;
-    private readonly DispatcherTimer     displayTimer;
-    private readonly DispatcherTimer      memoryTimer;
+    private readonly ConcurrentQueue<DomainPacket> pendingPackets = [];
+
+    private readonly DispatcherTimer displayTimer;
+    private readonly DispatcherTimer  memoryTimer;
 
     private readonly ConnectionsViewModel viewModel;
 
@@ -58,7 +58,7 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
     public ConnectionsController(ConnectionsViewModel viewModel, IMapper mapper, IMessenger messenger, IConnectionsService connectionService, ICapturePackets capturePackets) {
         this.viewModel = viewModel;
 
-        this.viewModel.Connections = new LockingObservableCollection<ConnectionViewEntity>();
+        this.viewModel.Connections = [];
 
         this.mapper    = mapper;
         this.messenger = messenger;
@@ -69,9 +69,8 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
         connections = [];
         packets     = [];
 
-        connectionsTimer = new DispatcherTimer();
-            displayTimer = new DispatcherTimer();
-             memoryTimer = new DispatcherTimer();
+        displayTimer = new DispatcherTimer();
+         memoryTimer = new DispatcherTimer();
 
         comparer = new ConnectionViewEntityComparer();
     }
@@ -83,11 +82,6 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
     public int InitializePriority => 100;
 
     public Task InitializeAsync() {
-        connectionsTimer.Tick    += OnConnectionsTimerTick;
-        connectionsTimer.Interval = TimeSpan.FromMilliseconds(10);
-
-        connectionsTimer.Start();
-
         displayTimer.Tick    += OnDisplayTimerTick;
         displayTimer.Interval = TimeSpan.FromMilliseconds(10);
 
@@ -136,70 +130,76 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
     #region Private Methods
 
     private void OnPacketCaptured(DomainPacket packet) {
-        List<ConnectionViewEntity> locals = viewModel.Connections.Where(c => c.Key == packet.Key1).ToList();
+        pendingPackets.Enqueue(packet);
+    }
 
-        locals.ForEach(local => {
-            local.PacketsSent = (local.PacketsSent ?? 0) + 1;
-            local.BytesSent   = (local.BytesSent   ?? 0) + packet.Bytes;
+    private void DrainCapturedPackets() {
+        viewModel.PacketQueue = pendingPackets.Count;
 
-            local.HasData  = true;
-            local.IsNew    = false;
-            local.IsClosed = false;
+        while(pendingPackets.TryDequeue(out DomainPacket? packet)) {
+            List<ConnectionViewEntity> locals = [.. viewModel.Connections.Where(c => c.Key == packet.Key1)];
 
-            local.LastChange = DateTime.Now;
-        });
+            locals.ForEach(local => {
+                local.PacketsSent = (local.PacketsSent ?? 0) + 1;
+                local.BytesSent   = (local.BytesSent   ?? 0) + packet.Bytes;
 
-        List<ConnectionViewEntity> remotes = viewModel.Connections.Where(c => c.Key == packet.Key2).ToList();
+                local.HasData  = true;
+                local.IsNew    = false;
+                local.IsClosed = false;
 
-        remotes.ForEach(remote => {
-            remote.PacketsReceived = (remote.PacketsReceived ?? 0) + 1;
-            remote.BytesReceived   = (remote.BytesReceived   ?? 0) + packet.Bytes;
+                local.LastChange = DateTime.Now;
+            });
 
-            remote.HasData  = true;
-            remote.IsNew    = false;
-            remote.IsClosed = false;
+            List<ConnectionViewEntity> remotes = [.. viewModel.Connections.Where(c => c.Key == packet.Key2)];
 
-            remote.LastChange = DateTime.Now;
-        });
+            remotes.ForEach(remote => {
+                remote.PacketsReceived = (remote.PacketsReceived ?? 0) + 1;
+                remote.BytesReceived   = (remote.BytesReceived   ?? 0) + packet.Bytes;
 
-        if (locals.Count != 0 || remotes.Count != 0) return;
+                remote.HasData  = true;
+                remote.IsNew    = false;
+                remote.IsClosed = false;
 
-        viewModel.DroppedPackets++;
+                remote.LastChange = DateTime.Now;
+            });
 
-        if (!viewModel.ViewDropped) return;
+            if (locals.Count != 0 || remotes.Count != 0) continue;
 
-        bool exists = packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key);
+            viewModel.DroppedPackets++;
 
-        if (exists) return;
+            if (!viewModel.ViewDropped) continue;
 
-        if (packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key)) return;
+            bool exists = packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key);
 
-        bool isSourceLocal      = connectionService.IsLocalAddress(packet.SourceEndPoint);
-        bool isDestinationLocal = connectionService.IsLocalAddress(packet.DestinationEndPoint);
+            if (exists) continue;
 
-        DomainConnection connection = mapper.Map<DomainConnection>(packet);
+            if (packets.Any(p => packet.Key1 == p.Key || packet.Key2 == p.Key)) continue;
 
-        if ((isSourceLocal && isDestinationLocal) || isSourceLocal) {
-            connection.Key = packet.Key1;
+            bool isSourceLocal      = connectionService.IsLocalAddress(packet.SourceEndPoint);
+            bool isDestinationLocal = connectionService.IsLocalAddress(packet.DestinationEndPoint);
 
-            connection.LocalEndPoint  = packet.SourceEndPoint;
-            connection.RemoteEndPoint = packet.DestinationEndPoint;
+            DomainConnection connection = mapper.Map<DomainConnection>(packet);
+
+            if ((isSourceLocal && isDestinationLocal) || isSourceLocal) {
+                connection.Key = packet.Key1;
+
+                connection.LocalEndPoint  = packet.SourceEndPoint;
+                connection.RemoteEndPoint = packet.DestinationEndPoint;
+            }
+            else {
+                connection.Key = packet.Key2;
+
+                connection.LocalEndPoint  = packet.DestinationEndPoint;
+                connection.RemoteEndPoint = packet.SourceEndPoint;
+            }
+
+            packets.Add(connection);
         }
-        else {
-            connection.Key = packet.Key2;
-
-            connection.LocalEndPoint  = packet.DestinationEndPoint;
-            connection.RemoteEndPoint = packet.SourceEndPoint;
-        }
-
-        packets.Add(connection);
     }
 
     private static void OnDeviceMessage(DomainDeviceError deviceMessage) { }
 
-    private async void OnConnectionsTimerTick(object sender, EventArgs args) {
-        connectionsTimer.Stop();
-
+    private async Task LoadConnectionsAsync() {
         Stopwatch watch = Stopwatch.StartNew();
 
         List<DomainConnection> incoming = await connectionService.GetConnectionsAsync().Fire();
@@ -218,31 +218,39 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
 
         mods.ForEach(set => mapper.Map(set.Mod, set.Match));
 
-        List<DomainConnection> adds = (from row1 in incoming
-                                       join row2 in connections on row1.Key equals row2.Key into collGroup
-                                       from sub  in collGroup.DefaultIfEmpty()
-                                      where sub == null
-                                     select row1).ToList();
+        List<DomainConnection> adds = [
+            .. from row1 in incoming
+               join row2 in connections on row1.Key equals row2.Key into collGroup
+               from sub in collGroup.DefaultIfEmpty()
+              where sub == null
+             select row1
+        ];
 
         adds.ForEach(add => add.ResolveHostNamesAsync(connectionService).FireAndForget());
 
         connections.AddRange(adds);
 
-        List<DomainConnection> dels = (from row1 in connections
-                                       join row2 in incoming on row1.Key equals row2.Key into collGroup
-                                       from sub  in collGroup.DefaultIfEmpty()
-                                      where sub == null
-                                     select row1).ToList();
+        List<DomainConnection> dels = [
+            .. from row1 in connections
+               join row2 in incoming on row1.Key equals row2.Key into collGroup
+               from sub in collGroup.DefaultIfEmpty()
+              where sub == null
+             select row1
+        ];
 
         dels.ForEach(del => connections.Remove(del));
 
-        viewModel.ConnectionsPass = watch.ElapsedMilliseconds;
+        watch.Stop();
 
-        if (!shutdown) connectionsTimer.Start();
+        viewModel.ConnectionsPass = watch.ElapsedMilliseconds;
     }
 
-    private void OnDisplayTimerTick(object sender, EventArgs args) {
+    private void OnDisplayTimerTick(object? sender, EventArgs args) {
         displayTimer.Stop();
+
+        LoadConnectionsAsync().FireAndWait();
+
+        DrainCapturedPackets();
 
         Stopwatch watch = Stopwatch.StartNew();
 
@@ -254,7 +262,7 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
             c.HasData    = false;
         });
 
-        List<ConnectionViewEntity> closed = viewModel.Connections.Where(c => now - c.LastChange > closedLagTime && c.IsClosed).ToList();
+        List<ConnectionViewEntity> closed = [.. viewModel.Connections.Where(c => now - c.LastChange > closedLagTime && c.IsClosed)];
 
         closed.ForEach(c => viewModel.Connections.Remove(c));
 
@@ -264,7 +272,9 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
 
         mods.ForEach(set => {
             if (set.Mod.Pid > 0 && set.Match.Pid > 0 && set.Mod.Pid != set.Match.Pid) return;
-
+            //
+            // ReSharper disable once InvertIf
+            //
             if ((set.Mod.Pid > 0 && set.Match.Pid < 1) || set.Mod.ProcessName != set.Match.ProcessName || set.Mod.State != set.Match.State || set.Mod.LocalHostName != set.Match.LocalHostName || set.Mod.RemoteHostName != set.Match.RemoteHostName) {
                 set.Match.HasChanged = set.Mod.State != set.Match.State;
 
@@ -272,11 +282,13 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
             }
         });
 
-        List<DomainConnection> adds = (from row1 in connections
-                                       join row2 in viewModel.Connections on row1.Key equals row2.Key into collGroup
-                                       from sub  in collGroup.DefaultIfEmpty()
-                                      where sub == null
-                                     select row1).ToList();
+        List<DomainConnection> adds = [
+            .. from row1 in connections
+               join row2 in viewModel.Connections on row1.Key equals row2.Key into collGroup
+               from sub in collGroup.DefaultIfEmpty()
+              where sub == null
+             select row1
+        ];
 
         List<ConnectionViewEntity> added = mapper.Map<List<ConnectionViewEntity>>(adds.Where(add => !String.IsNullOrEmpty(add.ProcessName)));
 
@@ -284,12 +296,14 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
 
         viewModel.Connections.OrderedMerge(added.OrderBy(add => add, comparer));
 
-        List<ConnectionViewEntity> dels = (from row1 in viewModel.Connections
-                                           join row2 in connections on row1.Key equals row2.Key into collGroup
-                                           from sub  in collGroup.DefaultIfEmpty()
-                                          where sub == null
-                                             && !row1.IsClosed
-                                         select row1).ToList();
+        List<ConnectionViewEntity> dels = [
+            .. from row1 in viewModel.Connections
+               join row2 in connections on row1.Key equals row2.Key into collGroup
+               from sub in collGroup.DefaultIfEmpty()
+              where sub == null
+                 && !row1.IsClosed
+             select row1
+        ];
 
         dels.ForEach(del => { del.IsClosed = true; del.LastChange = DateTime.Now; });
 
@@ -305,16 +319,18 @@ public sealed class ConnectionsController : IController, IMessageReceiver {
         }
         else viewModel.Connections.ForEach(c => c.IsVisible = true);
 
-        if (viewModel.IsEstablished) viewModel.Connections.Where(c => c.IsVisible).ForEach(c => c.IsVisible = c.State == "Established" || (c.ConnectionType.StartsWith("UDP") && (c.BytesSent > 0 || c.BytesReceived > 0)));
+        if (viewModel.IsEstablished) viewModel.Connections.Where(c => c.IsVisible).ForEach(c => c.IsVisible = c.State == "Established" || (c.ConnectionType!.StartsWith("UDP") && (c.BytesSent > 0 || c.BytesReceived > 0)));
+
+        watch.Stop();
 
         viewModel.UiPass = watch.ElapsedMilliseconds;
 
         if (!shutdown) displayTimer.Start();
     }
 
-    private void OnMemoryTimerTick(object sender, EventArgs args) {
-        viewModel.TcpConnections = viewModel.Connections.Count(c => c.IsVisible && c.ConnectionType.StartsWith("TCP"));
-        viewModel.UdpConnections = viewModel.Connections.Count(c => c.IsVisible && c.ConnectionType.StartsWith("UDP"));
+    private void OnMemoryTimerTick(object? sender, EventArgs args) {
+        viewModel.TcpConnections = viewModel.Connections.Count(c => c.IsVisible && c.ConnectionType!.StartsWith("TCP"));
+        viewModel.UdpConnections = viewModel.Connections.Count(c => c.IsVisible && c.ConnectionType!.StartsWith("UDP"));
 
         using Process process = Process.GetCurrentProcess();
 
